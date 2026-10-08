@@ -14,8 +14,8 @@ public class DeliveryTests
         var site = farm.Place("vedboden", 12, 6);
         int ticks = farm.RunUntil(() => site.Stage == BuildingStage.Done, 3000, "vedboden byggd");
 
-        Assert.Equal(10 - 3, farm.Home.OutputCount(farm.G("brador")));
-        Assert.Equal(6 - 1, farm.Home.OutputCount(farm.G("sten")));
+        Assert.Equal(16 - 3, farm.Home.OutputCount(farm.G("brador")));
+        Assert.Equal(9 - 1, farm.Home.OutputCount(farm.G("sten")));
         Assert.Empty(farm.State.Deliveries);
         // 60 sekunders arbete, delat på två hantlangare, plus att bära dit materialet.
         Assert.InRange(ticks, 300, 1200);

@@ -85,7 +85,8 @@ public class CrispbreadFarmTests
         _out.WriteLine("Knäckebröd per 5 min: " + string.Join(", ", perWindow));
         _out.WriteLine($"På bordet: {table.InputCount(farm.G("knackebrod"))}, medelhumör {farm.State.People.Average(p => p.Mood):F0}");
 
-        Assert.All(perWindow, n => Assert.True(n >= 20, $"för lite knäckebröd: {string.Join(", ", perWindow)}"));
+        // Sedan humöret sjunker var 9:e sekund (2026-10-08) äter gården mindre och bagar efter det.
+        Assert.All(perWindow, n => Assert.True(n >= 15, $"för lite knäckebröd: {string.Join(", ", perWindow)}"));
         Assert.True(perWindow.Min() * 2 >= perWindow.Max(), $"ojämn takt: {string.Join(", ", perWindow)}");
         Assert.Equal(gaveUp, farm.State.Players[0].GaveUp);
     }
