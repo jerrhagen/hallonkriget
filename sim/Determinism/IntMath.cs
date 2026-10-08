@@ -25,6 +25,7 @@ public static class IntMath
     public static int Min(int a, int b) => a < b ? a : b;
 
     public static int Abs(int value) => value < 0 ? -value : value;
+    public static int Sign(int value) => value > 0 ? 1 : value < 0 ? -1 : 0;
 
     public static int Clamp(int value, int min, int max) =>
         value < min ? min : value > max ? max : value;

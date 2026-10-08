@@ -14,6 +14,12 @@ public enum PersonRole : byte
 
     /// <summary>Arbetar i en byggnad. Yrket står i Profession och ska stämma med byggnadens "worker".</summary>
     Worker,
+
+    /// <summary>Går till logen och väntar där på utrustning.</summary>
+    Recruit,
+
+    /// <summary>Soldat, eller djur i strid. Enheten står i Unit.</summary>
+    Soldier,
 }
 
 public enum PersonJob : byte
@@ -36,6 +42,12 @@ public enum PersonJob : byte
 
     /// <summary>Ligger hemma i stugan och vilar.</summary>
     Resting,
+
+    /// <summary>Rekryten väntar inne i logen.</summary>
+    InBarracks,
+
+    /// <summary>Soldaten är i fält med sin grupp.</summary>
+    Soldiering,
 }
 
 /// <summary>
@@ -46,11 +58,38 @@ public sealed class Person
 {
     public int Id { get; }
     public byte Owner { get; }
-    public PersonRole Role { get; }
+    public PersonRole Role { get; internal set; }
     public string Profession { get; }
 
     /// <summary>Kostnadsenheter × 10 per tick. 48 är 1,2 rutor per sekund på upptrampad stig.</summary>
-    public int Speed { get; }
+    public int Speed { get; internal set; }
+
+    /// <summary>Soldatens enhet (nummer i units.json), eller -1.</summary>
+    public int Unit { get; internal set; } = -1;
+
+    /// <summary>Gruppen soldaten hör till, eller -1.</summary>
+    public int Group { get; internal set; } = -1;
+
+    /// <summary>Skott kvar för avståndsvapen.</summary>
+    public int Shots { get; internal set; }
+
+    /// <summary>Tick kvar till nästa slag eller skott.</summary>
+    public int StrikeTimer { get; internal set; }
+
+    /// <summary>Tick kvar av striden: så länge tappar soldaten humör dubbelt så fort. Noll utanför strid.</summary>
+    public int CombatTicks { get; internal set; }
+
+    /// <summary>Sammanstötningar soldaten har överlevt. Efter tre får hen medaljen.</summary>
+    public int Clashes { get; internal set; }
+
+    /// <summary>Korken på snöret: +1 i anfall.</summary>
+    public bool Medal { get; internal set; }
+
+    /// <summary>Bränsle kvar i tick (traktorn).</summary>
+    public int Fuel { get; internal set; }
+
+    /// <summary>Fienden soldaten slåss mot just nu: personens id, eller -1.</summary>
+    public int Foe { get; internal set; } = -1;
 
     public TilePoint Tile { get; internal set; }
     public TilePoint From { get; internal set; }
@@ -134,6 +173,15 @@ public sealed class Person
         h.Add(SpeedBonusTicks);
         h.Add(WorkBonusTicks);
         h.Add(AttackBonusTicks);
+        h.Add(Unit);
+        h.Add(Group);
+        h.Add(Shots);
+        h.Add(StrikeTimer);
+        h.Add(CombatTicks);
+        h.Add(Clashes);
+        h.Add(Medal);
+        h.Add(Fuel);
+        h.Add(Foe);
         h.Add(PathIndex);
         h.Add(Path.Count);
         foreach (var p in Path)

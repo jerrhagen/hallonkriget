@@ -2,6 +2,26 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Logen, grupperna och striden (fas 3)
+
+- Enheterna står i `data/units.json` med siffrorna från designdokumentet. Fart i tiondels rutor per sekund på gräs.
+- Rekryten är ett yrke i bygdegården (kaffe, inget verktyg). Rekryten går till logen och väntar där. Spelaren beställer en enhet i logen, som förbrukar rekryter och utrustning ur logens lager. Logen rymmer 20 av varje vara.
+- Utrustningen i logen gäller per figur. En höns-chocktrupp är tio hönor, var och en med en höna, en syfingerborg, en mössa och ett hårdkokt ägg. En gåsskvadron är fem gäss.
+- Ett hårdkokt ägg räcker till tio kast, en kart och ett vedträ till ett skott. Varje figur bär högst 10 skott (gubben 6). Den som har skjutit slut går själv till logen och fyller på; gubben går hem till stugan och hämtar saltpatroner.
+- Vedkatapulten och traktorn görs i logen av sina delar (brädor, hjul, järn), inte i uppfinnarverkstan och maskinhallen, så att all utrustning går till samma ställe. Katapultens två rekryter blir en enhet.
+- Traktorn får en dunk bensin med sig och tankar i en egen loge inom tre rutor, högst tre dunkar. Utan bensin står den still.
+- Gubben finns från start som en grupp för sig. Han bor i stugan, räknas inte i befolkningen och äter hemma: hans humör sjunker bara av fienden. Djuren behöver inga sovplatser.
+- En soldat letar fiender inom 6 rutor. En grupp som står still anfaller fiender inom synhåll; en grupp som marscherar bryr sig bara om dem som står intill. Soldater slår helst soldater, annars folk.
+- Soldater ställer sig inte på stigar och dörrar, så att bärarna kommer fram.
+- Hungriga soldater går själva till kafferepet när gruppen står still och ingen fiende syns.
+- En soldat som ger upp blir en rekryt utan utrustning och vilar hemma. Djur som ger upp går hem och syns inte mer. Medaljen kommer efter tre sammanstötningar.
+- Spejarna Sixten och Major i fält (stjäla, bita) väntar till fas 5; de är inte med i fasens lista.
+
+## 2026-10-08: Fas 2 är klar
+
+- Kontrollfrågan för fas 2 ("är det roligt att bygga gården i 30 minuter utan strid?") är besvarad ja. Aron hann inte spela så mycket men tycker att det fungerar och att vi kan gå vidare. Fas 3 börjar, i en egen tråd i projektet.
+- Startförrådet (10 brädor, 6 sten) är oförändrat, så alla ger fortfarande upp av hunger en gång runt minut 10. Om startförrådet ska ändras är en öppen fråga till Aron.
+
 ## 2026-10-08: Gården i Godot (fas 2)
 
 - Spelet startar på kartan `hemmanet` som Torpet. Byggnader utom hönshuset är platshållare: ett hus i byggnadens färggrupp med namnskylt, falurött tak för Torpet och grått för Storgården. Personerna är pysslingen, tonad efter roll, med en lapp för varan de bär.

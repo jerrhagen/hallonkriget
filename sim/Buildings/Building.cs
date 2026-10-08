@@ -54,6 +54,12 @@ public sealed class Building
 
     public int CycleTicksLeft { get; private set; }
 
+    /// <summary>Spelaren som har tagit byggnaden, eller 255. En tagen byggnad står tom tills fienden har gått.</summary>
+    public byte TakenBy { get; internal set; } = Map.GameMap.NoOwner;
+
+    /// <summary>Hur länge fienden har stått vid dörren utan motstånd.</summary>
+    public int CaptureTicks { get; internal set; }
+
     /// <summary>Varor på väg hit med bärare, per vara. Räknas av när de kommer fram.</summary>
     internal readonly int[] Incoming;
 
@@ -184,7 +190,7 @@ public sealed class Building
         if (!Uses(good)) return 0;
         if (Def.Table > 0) return Def.Table - InputTotal;
         if (Def.School is { } school) return SchoolSpace(school, good);
-        return StockLimit - _input[good];
+        return Def.StockLimit - _input[good];
     }
 
     /// <summary>Hur många till som kan begäras, med det som redan är på väg. Bordet delas av all mat.</summary>
@@ -429,6 +435,8 @@ public sealed class Building
         h.Add(_nextAutoRecipe);
         h.Add(_lastDay);
         h.Add(Gathered);
+        h.Add(TakenBy);
+        h.Add(CaptureTicks);
         foreach (int d in _delivered) h.Add(d);
         h.AddSparse(_input);
         h.AddSparse(_output);

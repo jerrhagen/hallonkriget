@@ -24,8 +24,15 @@ public sealed class Player
     /// <summary>Hur många gånger någon av spelarens personer har gett upp av hunger.</summary>
     public int GaveUp { get; internal set; }
 
-    public Player(byte id, Faction faction, bool isComputer, int goodCount)
+    /// <summary>Soldater och djur som har gett upp i fält.</summary>
+    public int SoldiersLost { get; internal set; }
+
+    /// <summary>Hur många figurer av varje enhet logen har gjort.</summary>
+    public int[] Equipped { get; }
+
+    public Player(byte id, Faction faction, bool isComputer, int goodCount, int unitCount = 0)
     {
+        Equipped = new int[unitCount];
         Id = id;
         Faction = faction;
         IsComputer = isComputer;
@@ -41,5 +48,7 @@ public sealed class Player
         h.AddSparse(Produced);
         h.AddSparse(Eaten);
         h.Add(GaveUp);
+        h.Add(SoldiersLost);
+        h.AddSparse(Equipped);
     }
 }

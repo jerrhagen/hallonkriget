@@ -1,8 +1,9 @@
 {
-  "_kommentar": "Yrkena, designdokumentet (Folk och yrken). Varje byggnads arbetare är ett yrke här. role: carrier bär, laborer bygger och trampar stigar, worker arbetar i sin byggnad. tool är det bygdegården förbrukar utöver kaffet.",
+  "_kommentar": "Yrkena, designdokumentet (Folk och yrken). Varje byggnads arbetare är ett yrke här. role: carrier bär, laborer bygger och trampar stigar, worker arbetar i sin byggnad, recruit går till logen och väntar på utrustning. tool är det bygdegården förbrukar utöver kaffet.",
   "professions": [
     { "id": "barare", "name": "Bärare", "role": "carrier" },
     { "id": "hantlangare", "name": "Hantlangare", "role": "laborer" },
+    { "id": "rekryt", "name": "Rekryt", "role": "recruit" },
     { "id": "skogshuggare", "name": "Skogshuggare", "role": "worker", "tool": "verktyg" },
     { "id": "sagare", "name": "Sågare", "role": "worker", "tool": "verktyg" },
     { "id": "vedhuggare", "name": "Vedhuggare", "role": "worker", "tool": "verktyg" },

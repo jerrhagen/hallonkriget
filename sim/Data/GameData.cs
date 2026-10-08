@@ -53,6 +53,80 @@ public readonly record struct ProfessionAmount(int Profession, int Count);
 /// <summary>Bygdegården: tid per utbildning, hur lång kön får vara och vad som betalar (ett av alternativen).</summary>
 public sealed record SchoolDef(int Ticks, int QueueLimit, GoodAmount[][] Pay);
 
+/// <summary>Avståndsvapnens ammunition: varan och hur många skott en vara ger.</summary>
+public sealed record AmmoDef(int Good, int ShotsPerGood);
+
+/// <summary>Skräms: sänker fiendens humör inom radien varje sekund. TimidOnly: bara höns och pysslingar.</summary>
+public sealed record ScareDef(int Radius, int PerSecond, bool TimidOnly);
+
+/// <summary>Bränsle: en vara räcker så här många tick (traktorns bensin).</summary>
+public sealed record FuelDef(int Good, int Ticks);
+
+/// <summary>Stridens regler från units.json, i tick där det är tid.</summary>
+public sealed record CombatRules(int StrikeTicks, int Sight, int GroupMax, int MaxShots, int SoldierHungerPercent,
+    int CombatHungerPercent, int MedalAfter, int CaptureTicks, int BarracksStock)
+{
+    public static readonly CombatRules Default = new(20, 6, 20, 10, 150, 200, 3, 200, 20);
+}
+
+/// <summary>
+/// En stridsenhet från units.json. Attack och Defence är humör per slag, Mood enhetens max.
+/// Speed är personens fart i samma enhet som Person.Speed. Range noll är närstrid.
+/// </summary>
+public sealed class UnitDef
+{
+    public int Index { get; init; }
+    public string Id { get; init; } = "";
+    public string Name { get; init; } = "";
+    public FactionRule Faction { get; init; }
+    public int Attack { get; init; }
+    public int Defence { get; init; }
+    public int Mood { get; init; }
+    public int Speed { get; init; }
+    public int Range { get; init; }
+
+    /// <summary>Hur nära en närstridsenhet når, i rutor. Hundkojans kedja når 2.</summary>
+    public int Reach { get; init; } = 1;
+    public int Recruits { get; init; }
+
+    /// <summary>Så många figurer ger en beställning i logen. Utrustningen gäller per figur.</summary>
+    public int Squad { get; init; } = 1;
+    public int GroupMax { get; init; }
+    public GoodAmount[] Gear { get; init; } = Array.Empty<GoodAmount>();
+    public AmmoDef? Ammo { get; init; }
+    public int MaxShots { get; init; }
+    public ScareDef? Scare { get; init; }
+    public FuelDef? Fuel { get; init; }
+
+    /// <summary>Höns: tappar dubbelt av skräms.</summary>
+    public bool Timid { get; init; }
+    public bool BreaksWalls { get; init; }
+
+    /// <summary>Går som fordon: inte i myr.</summary>
+    public bool Vehicle { get; init; }
+
+    /// <summary>Kaffedrängen: bär kaffe och mat till soldaterna.</summary>
+    public bool Server { get; init; }
+
+    /// <summary>Gubben: finns från start, en per sida.</summary>
+    public bool Hero { get; init; }
+
+    /// <summary>Träffar en gång av så många, och den som träffas ger upp direkt. Noll: vanlig träff.</summary>
+    public int HitOneIn { get; init; }
+
+    /// <summary>Byggnaden enheten sitter i (vedtraven, hundkojan), annars null.</summary>
+    public string? Fixed { get; init; }
+
+    public bool IsRanged => Range > 0;
+
+    public bool AllowedFor(Faction faction) => Faction switch
+    {
+        FactionRule.Torpet => faction == Sim.Faction.Torpet,
+        FactionRule.Storgarden => faction == Sim.Faction.Storgarden,
+        _ => true,
+    };
+}
+
 /// <summary>Vilket läger som kan bygga en byggnad.</summary>
 public enum FactionRule : byte
 {
@@ -120,6 +194,15 @@ public sealed class BuildingDef
 
     public SchoolDef? School { get; init; }
 
+    /// <summary>Logen: tar emot utrustningen och gör soldater av rekryter.</summary>
+    public bool Barracks { get; init; }
+
+    /// <summary>Hur många av varje vara inlagret rymmer. Fem, utom i logen.</summary>
+    public int StockLimit { get; init; } = Sim.Buildings.Building.StockLimit;
+
+    /// <summary>Enheten som sitter i byggnaden (vedtraven, hundkojan), eller -1.</summary>
+    public int FixedUnit { get; internal set; } = -1;
+
     public bool IsStorage => Storage > 0;
 
     public bool AllowedFor(Faction faction) => Faction switch
@@ -143,25 +226,36 @@ public sealed class GameData
     public IReadOnlyList<FoodDef> Foods { get; }
     public MoodRules Mood { get; }
     public IReadOnlyList<ProfessionDef> Professions { get; }
+    public IReadOnlyList<UnitDef> Units { get; }
+    public CombatRules Combat { get; }
     public ulong Fingerprint { get; }
 
     public static readonly GameData Empty = new(Array.Empty<GoodDef>(), Array.Empty<BuildingDef>(),
-        Array.Empty<FoodDef>(), MoodRules.Default, Array.Empty<ProfessionDef>());
+        Array.Empty<FoodDef>(), MoodRules.Default, Array.Empty<ProfessionDef>(), Array.Empty<UnitDef>(), CombatRules.Default);
 
-    private GameData(GoodDef[] goods, BuildingDef[] buildings, FoodDef[] foods, MoodRules mood, ProfessionDef[] professions)
+    private GameData(GoodDef[] goods, BuildingDef[] buildings, FoodDef[] foods, MoodRules mood, ProfessionDef[] professions,
+        UnitDef[] units, CombatRules combat)
     {
         Goods = goods;
         Buildings = buildings;
         Foods = foods;
         Mood = mood;
         Professions = professions;
+        Units = units;
+        Combat = combat;
         Fingerprint = ComputeFingerprint();
     }
 
     /// <summary>Läser alla datafiler med readFile("goods.json") och så vidare.</summary>
     public static GameData FromFiles(Func<string, string> readFile) => Parse(
         readFile("goods.json"), readFile("buildings.json"),
-        readFile("food.json"), readFile("professions.json"), readFile("trade.json"));
+        readFile("food.json"), readFile("professions.json"), readFile("trade.json"), readFile("units.json"));
+
+    public UnitDef Unit(string id)
+    {
+        foreach (var u in Units) if (u.Id == id) return u;
+        throw new KeyNotFoundException($"Okänd enhet: {id}");
+    }
 
     public int ProfessionIndex(string id)
     {
@@ -194,7 +288,7 @@ public sealed class GameData
     /// förklaring om något är fel.
     /// </summary>
     public static GameData Parse(string goodsJson, string buildingsJson,
-        string? foodJson = null, string? professionsJson = null, string? tradeJson = null)
+        string? foodJson = null, string? professionsJson = null, string? tradeJson = null, string? unitsJson = null)
     {
         var goods = new List<GoodDef>();
         using (var doc = JsonDocument.Parse(goodsJson))
@@ -267,6 +361,7 @@ public sealed class GameData
                     "carrier" => PersonRole.Carrier,
                     "laborer" => PersonRole.Laborer,
                     "worker" => PersonRole.Worker,
+                    "recruit" => PersonRole.Recruit,
                     var r => throw new GameDataException($"{id}: okänd roll {r}"),
                 };
                 int tool = p.TryGetProperty("tool", out var t) ? Good(t.GetString()!, id) : -1;
@@ -296,6 +391,17 @@ public sealed class GameData
                     trade.Add(new Recipe(price.ToArray(), new[] { new GoodAmount(buy, 1) }, ticks, faction));
                 }
             }
+        }
+
+        var (units, combat) = unitsJson is null ? (new List<UnitDef>(), CombatRules.Default) : ParseUnits(unitsJson, Good, Amounts);
+        // Logen tar emot all utrustning, ammunition och bränsle, utom gubbens patroner som hämtas hemma.
+        var gear = new List<int>();
+        foreach (var u in units)
+        {
+            if (u.Hero || u.Fixed is not null) continue;
+            foreach (var a in u.Gear) if (!gear.Contains(a.Good)) gear.Add(a.Good);
+            if (u.Ammo is { } am && !gear.Contains(am.Good)) gear.Add(am.Good);
+            if (u.Fuel is { } fu && !gear.Contains(fu.Good)) gear.Add(fu.Good);
         }
 
         var buildings = new List<BuildingDef>();
@@ -349,6 +455,8 @@ public sealed class GameData
                 int table = b.TryGetProperty("table", out var tb) ? tb.GetInt32() : 0;
                 var accepts = new List<int>();
                 if (table > 0) foreach (var f in foods) accepts.Add(f.Good);
+                bool barracks = b.TryGetProperty("barracks", out var ba) && ba.GetBoolean();
+                if (barracks) accepts.AddRange(gear);
 
                 SchoolDef? school = null;
                 if (b.TryGetProperty("school", out var sc))
@@ -410,10 +518,89 @@ public sealed class GameData
                     IsTrade = isTrade,
                     ClosedSundays = b.TryGetProperty("closed_sundays", out var cs) && cs.GetBoolean(),
                     School = school,
+                    Barracks = barracks,
+                    StockLimit = barracks ? combat.BarracksStock : Sim.Buildings.Building.StockLimit,
                 });
             }
         }
-        return new GameData(goods.ToArray(), buildings.ToArray(), foods.ToArray(), mood, professions.ToArray());
+        foreach (var u in units)
+        {
+            if (u.Fixed is null) continue;
+            var home = buildings.Find(x => x.Id == u.Fixed) ?? throw new GameDataException($"{u.Id}: okänd byggnad {u.Fixed}");
+            home.FixedUnit = u.Index;
+        }
+        return new GameData(goods.ToArray(), buildings.ToArray(), foods.ToArray(), mood, professions.ToArray(),
+            units.ToArray(), combat);
+    }
+
+    private static (List<UnitDef>, CombatRules) ParseUnits(string json, Func<string, string, int> good,
+        Func<JsonElement, string, string, GoodAmount[]> amounts)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var r = doc.RootElement.GetProperty("rules");
+        int Rule(string name) => r.GetProperty(name).GetInt32();
+        var combat = new CombatRules(
+            Rule("strike_seconds") * GameState.TicksPerSecond, Rule("sight"), Rule("group_max"), Rule("max_shots"),
+            Rule("soldier_hunger_percent"), Rule("combat_hunger_percent"), Rule("medal_after"),
+            Rule("capture_seconds") * GameState.TicksPerSecond, Rule("logen_stock"));
+        if (combat.StrikeTicks <= 0 || combat.Sight <= 0 || combat.GroupMax <= 0 || combat.SoldierHungerPercent <= 0 || combat.CombatHungerPercent <= 0)
+            throw new GameDataException("units.json: reglerna går inte ihop");
+
+        var units = new List<UnitDef>();
+        foreach (var u in doc.RootElement.GetProperty("units").EnumerateArray())
+        {
+            string id = RequireString(u, "id", "enhet");
+            if (units.Exists(x => x.Id == id)) throw new GameDataException($"Enheten {id} finns två gånger");
+            int Int(string name, int fallback = 0) => u.TryGetProperty(name, out var v) ? v.GetInt32() : fallback;
+            bool Flag(string name) => u.TryGetProperty(name, out var v) && v.GetBoolean();
+
+            AmmoDef? ammo = null;
+            if (u.TryGetProperty("ammo", out var am))
+                ammo = new AmmoDef(good(RequireString(am, "good", id), id), am.GetProperty("shots").GetInt32());
+            ScareDef? scare = null;
+            if (u.TryGetProperty("scare", out var sc))
+                scare = new ScareDef(sc.GetProperty("radius").GetInt32(), sc.GetProperty("per_second").GetInt32(),
+                    sc.TryGetProperty("timid_only", out var to) && to.GetBoolean());
+            FuelDef? fuel = null;
+            if (u.TryGetProperty("fuel", out var fu))
+                fuel = new FuelDef(good(RequireString(fu, "good", id), id), fu.GetProperty("seconds").GetInt32() * GameState.TicksPerSecond);
+
+            var unit = new UnitDef
+            {
+                Index = units.Count,
+                Id = id,
+                Name = RequireString(u, "name", id),
+                Faction = ParseFaction(RequireString(u, "faction", id), id),
+                Attack = Int("attack"),
+                Defence = Int("defence"),
+                Mood = Int("mood"),
+                // Tiondels rutor per sekund på gräs, som Person.Speed: gräs kostar 8 per steg, så 80 per ruta och sekund.
+                Speed = Int("speed") * TerrainRules.StepCost(Terrain.Clearing, MoveClass.Foot) * Pathfinder.Straight / GameState.TicksPerSecond,
+                Range = Int("range"),
+                Reach = Int("reach", 1),
+                Recruits = Int("recruits"),
+                Squad = Int("squad", 1),
+                GroupMax = Int("group_max", combat.GroupMax),
+                Gear = amounts(u, "gear", id),
+                Ammo = ammo,
+                MaxShots = ammo is null ? 0 : Int("max_shots", combat.MaxShots),
+                Scare = scare,
+                Fuel = fuel,
+                Timid = Flag("timid"),
+                BreaksWalls = Flag("breaks_walls"),
+                Vehicle = Flag("vehicle"),
+                Server = Flag("server"),
+                Hero = Flag("hero"),
+                HitOneIn = Int("hit_one_in"),
+                Fixed = u.TryGetProperty("fixed", out var fx) ? fx.GetString() : null,
+            };
+            if (unit.Mood <= 0 || unit.Squad <= 0 || unit.GroupMax <= 0 || unit.Recruits < 0 || unit.Attack < 0 || unit.Defence < 0)
+                throw new GameDataException($"{id}: siffrorna går inte ihop");
+            if (unit.Fixed is null && !unit.Hero && unit.Gear.Length == 0 && unit.Recruits == 0)
+                throw new GameDataException($"{id}: kostar ingenting i logen");
+            units.Add(unit);
+        }
+        return (units, combat);
     }
 
     private static string RequireString(JsonElement e, string property, string where)
@@ -527,6 +714,49 @@ public sealed class GameData
                 foreach (var p in s.Pay) AddAmounts(ref h, p);
             }
             AddString(ref h, b.Worker ?? "");
+            h.Add(b.Barracks);
+            h.Add(b.StockLimit);
+            h.Add(b.FixedUnit);
+        }
+        h.Add(Combat.StrikeTicks);
+        h.Add(Combat.Sight);
+        h.Add(Combat.GroupMax);
+        h.Add(Combat.MaxShots);
+        h.Add(Combat.SoldierHungerPercent);
+        h.Add(Combat.CombatHungerPercent);
+        h.Add(Combat.MedalAfter);
+        h.Add(Combat.CaptureTicks);
+        h.Add(Combat.BarracksStock);
+        h.Add(Units.Count);
+        foreach (var u in Units)
+        {
+            AddString(ref h, u.Id);
+            h.Add((byte)u.Faction);
+            h.Add(u.Attack);
+            h.Add(u.Defence);
+            h.Add(u.Mood);
+            h.Add(u.Speed);
+            h.Add(u.Range);
+            h.Add(u.Reach);
+            h.Add(u.Recruits);
+            h.Add(u.Squad);
+            h.Add(u.GroupMax);
+            AddAmounts(ref h, u.Gear);
+            h.Add(u.Ammo?.Good ?? -1);
+            h.Add(u.Ammo?.ShotsPerGood ?? 0);
+            h.Add(u.MaxShots);
+            h.Add(u.Scare?.Radius ?? 0);
+            h.Add(u.Scare?.PerSecond ?? 0);
+            h.Add(u.Scare?.TimidOnly ?? false);
+            h.Add(u.Fuel?.Good ?? -1);
+            h.Add(u.Fuel?.Ticks ?? 0);
+            h.Add(u.Timid);
+            h.Add(u.BreaksWalls);
+            h.Add(u.Vehicle);
+            h.Add(u.Server);
+            h.Add(u.Hero);
+            h.Add(u.HitOneIn);
+            AddString(ref h, u.Fixed ?? "");
         }
         h.Add(Mood.Max);
         h.Add(Mood.TicksPerPoint);
