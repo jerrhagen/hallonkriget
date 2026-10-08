@@ -71,7 +71,7 @@ public sealed partial class GameState
         if (!housing && Population(player.Id) >= Beds(player.Id) - 2
             && NearestOwn(player.Id, b => b.Def.School is not null && b.Stage == BuildingStage.Done) is not null)
         {
-            ai.NextStepTick = TickCount + level.StepTicks;
+            ai.NextStepTick = TickCount + StepDelay(level);
             Place(player, Data.Buildings[plan.House], -1, home);
             return;
         }
@@ -87,9 +87,12 @@ public sealed partial class GameState
             && FoodOnTables(player.Id) < 4 && FoodWaiting(player.Id) > 0) return;
 
         var step = plan.Steps[ai.NextStep++];
-        ai.NextStepTick = TickCount + level.StepTicks;
+        ai.NextStepTick = TickCount + StepDelay(level);
         Place(player, Data.Buildings[step.Building], step.Recipe, home);
     }
+
+    /// <summary>Tiden till nästa bygge, en fjärdedel hit eller dit, så att två datorer inte spelar samma match varje gång.</summary>
+    private int StepDelay(DifficultyPlan level) => level.StepTicks * Rng.Range(75, 125) / 100;
 
     private void Place(Player player, BuildingDef def, int recipe, Building home)
     {

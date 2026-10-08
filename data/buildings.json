@@ -10,10 +10,10 @@
       ],
       "faction": "torpet",
       "buildable": false,
-      "storage": 30,
+      "storage": 40,
       "start_stock": {
-        "brador": 10,
-        "sten": 6,
+        "brador": 16,
+        "sten": 9,
         "ved": 4,
         "knackebrod": 6,
         "kaffe": 2,
@@ -40,10 +40,10 @@
       ],
       "faction": "storgarden",
       "buildable": false,
-      "storage": 30,
+      "storage": 40,
       "start_stock": {
-        "brador": 10,
-        "sten": 6,
+        "brador": 16,
+        "sten": 9,
         "ved": 4,
         "knackebrod": 6,
         "kaffe": 2,
@@ -101,7 +101,7 @@
           "out": {
             "timmer": 1
           },
-          "seconds": 30
+          "seconds": 20
         }
       ]
     },
@@ -202,7 +202,7 @@
           "out": {
             "vatten": 1
           },
-          "seconds": 15
+          "seconds": 10
         }
       ]
     },
@@ -225,21 +225,21 @@
           "out": {
             "vete": 1
           },
-          "seconds": 40
+          "seconds": 25
         },
         {
           "in": {},
           "out": {
             "rag": 1
           },
-          "seconds": 40
+          "seconds": 25
         },
         {
           "in": {},
           "out": {
             "potatis": 1
           },
-          "seconds": 40
+          "seconds": 25
         }
       ],
       "field": [
@@ -268,7 +268,7 @@
           "out": {
             "mjol": 1
           },
-          "seconds": 20
+          "seconds": 12
         },
         {
           "in": {
@@ -277,7 +277,7 @@
           "out": {
             "ragmjol": 1
           },
-          "seconds": 20
+          "seconds": 12
         }
       ]
     },
@@ -304,7 +304,7 @@
           "out": {
             "knackebrod": 3
           },
-          "seconds": 30
+          "seconds": 18
         }
       ]
     },
@@ -389,7 +389,7 @@
           "out": {
             "surrogatkaffe": 2
           },
-          "seconds": 30
+          "seconds": 18
         }
       ]
     },
@@ -612,7 +612,7 @@
           "out": {
             "abborre": 1
           },
-          "seconds": 35
+          "seconds": 20
         }
       ],
       "next_to": "water"

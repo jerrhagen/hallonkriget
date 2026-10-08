@@ -39,7 +39,7 @@ public class TradeTests
         Assert.Equal(new[] { ("agg", 3), ("smor", 1), ("ved", 2), ("korv", 1) }, coffee);
         var tools = Assert.Single(def.Recipes, r => r.Out[0].Good == farm.G("verktyg"));
         Assert.Equal(new GoodAmount(farm.G("ved"), 3), Assert.Single(tools.In));
-        Assert.All(def.Recipes, r => Assert.Equal(200, r.Ticks));
+        Assert.All(def.Recipes, r => Assert.Equal(120, r.Ticks)); // 12 s sedan 2026-10-08
     }
 
     [Fact]

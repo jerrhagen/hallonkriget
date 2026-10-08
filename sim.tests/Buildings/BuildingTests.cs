@@ -54,9 +54,10 @@ public class BuildingTests
         var stugan = Assert.Single(s.Buildings);
         Assert.Equal("stugan", stugan.Def.Id);
         Assert.Equal(BuildingStage.Done, stugan.Stage);
-        // Designdokumentet: 10 brädor, 6 sten, 4 ved, 6 knäckebröd och 2 kaffe.
-        Assert.Equal(10, stugan.OutputCount(G("brador")));
-        Assert.Equal(6, stugan.OutputCount(G("sten")));
+        // Designdokumentet: 10 brädor, 6 sten, 4 ved, 6 knäckebröd och 2 kaffe. Sedan 2026-10-08
+        // 16 brädor och 9 sten, så att ett kafferep går att bygga direkt (beslut.md).
+        Assert.Equal(16, stugan.OutputCount(G("brador")));
+        Assert.Equal(9, stugan.OutputCount(G("sten")));
         Assert.Equal(4, stugan.OutputCount(G("ved")));
         Assert.Equal(6, stugan.OutputCount(G("knackebrod")));
         Assert.Equal(2, stugan.OutputCount(G("kaffe")));
@@ -66,11 +67,12 @@ public class BuildingTests
     }
 
     [Fact]
-    public void StorageHoldsThirtyGoodsInTotal()
+    public void StorageHoldsFortyGoodsInTotal()
     {
         var s = NewMatch(start: new TilePoint(5, 5));
         var stugan = s.Buildings[0];
-        // Startförrådet är 30 varor: 10 brädor, 6 sten, 4 ved, 6 knäckebröd, 2 kaffe och 2 verktyg.
+        // Stugan rymmer 40 och startförrådet är 39 varor: 16 brädor, 9 sten, 4 ved, 6 knäckebröd, 2 kaffe och 2 verktyg.
+        Assert.True(stugan.PutInput(G("timmer")));
         Assert.Equal(0, stugan.InputSpace(G("ved")));
         Assert.False(stugan.PutInput(G("timmer")));
         Assert.True(stugan.TakeOutput(G("kaffe")));
@@ -209,7 +211,7 @@ public class BuildingTests
     public void MillTakesTurnsUnlessARecipeIsChosen()
     {
         var s = NewMatch();
-        var kvarn = Place(s, "kvarnen", 10, 10); // vete -> mjöl, råg -> rågmjöl, 20 s
+        var kvarn = Place(s, "kvarnen", 10, 10); // vete -> mjöl, råg -> rågmjöl, 12 s
         Finish(kvarn);
         kvarn.HasWorker = true;
         for (int i = 0; i < 2; i++)
@@ -217,13 +219,13 @@ public class BuildingTests
             kvarn.PutInput(G("vete"));
             kvarn.PutInput(G("rag"));
         }
-        Run(s, 402);
+        Run(s, 242);
         Assert.Equal(1, kvarn.OutputCount(G("mjol")));
         Assert.Equal(1, kvarn.OutputCount(G("ragmjol")));
 
         s.Tick(new[] { new Command(s.TickCount, 0, CommandType.SelectRecipe, kvarn.Id, 1) });
         Assert.Equal(0, kvarn.InputSpace(G("vete"))); // vete behövs inte längre
-        Run(s, 500);
+        Run(s, 300);
         Assert.Equal(1, kvarn.OutputCount(G("mjol")));
         Assert.Equal(2, kvarn.OutputCount(G("ragmjol")));
         Assert.Equal(1, kvarn.InputCount(G("vete")));

@@ -179,7 +179,7 @@ public class AllBuildingsTests
 
         for (int i = 0; i < 6; i++)
         {
-            Run(s, 301);
+            Run(s, 201);
             koja.TakeOutput(G("timmer"));
         }
         Assert.Equal(6, s.Players[0].Produced[G("timmer")]);

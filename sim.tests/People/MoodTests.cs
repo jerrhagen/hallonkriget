@@ -11,15 +11,15 @@ public class MoodTests
     private static Farm Empty() => new(width: 30, height: 20);
 
     [Fact]
-    public void MoodDropsOnePointEverySixSeconds()
+    public void MoodDropsOnePointEveryNineSeconds()
     {
         var farm = Empty();
         var p = farm.State.SpawnPerson(0, PersonRole.Worker, new TilePoint(3, 3), "ingen");
         Assert.Equal(100, p.Mood);
-        farm.Run(60);
+        farm.Run(90);
         Assert.Equal(99, p.Mood);
-        farm.Run(60 * 69);
-        Assert.Equal(30, p.Mood); // sju minuter till 30, då man går och äter
+        farm.Run(90 * 69);
+        Assert.Equal(30, p.Mood); // tio och en halv minut till 30, då man går och äter
     }
 
     [Fact]
@@ -133,10 +133,11 @@ public class MoodTests
         foreach (var b in farm.State.Buildings)
         for (int g = 0; g < farm.Data.Goods.Count; g++)
             Assert.Equal(farm.State.Deliveries.Count(d => d.To == b.Id && d.Good == g), b.Incoming[g]);
-        // Varan följer med hem och läggs i stugan.
+        // Varan följer med hem och läggs i stugan. En annan bärare kan ha hunnit hämta en till bygget
+        // under tiden, så stugan har en mer än förut eller lika många.
         farm.RunUntil(() => carrier.Job == PersonJob.Resting, 600, "hemma");
         Assert.Equal(-1, carrier.Carrying);
-        Assert.Equal(atHome + 1, farm.Home.OutputCount(good));
+        Assert.InRange(farm.Home.OutputCount(good), atHome, atHome + 1);
         // Bygget blir ändå klart: de andra bär det som behövs.
         farm.RunUntil(() => site.Stage == BuildingStage.Done, 5000, "vedboden byggd");
     }

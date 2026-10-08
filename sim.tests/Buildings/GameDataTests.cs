@@ -23,12 +23,13 @@ public class GameDataTests
     [Fact]
     public void BakeryMatchesTheTable()
     {
-        // Produktionskedjor: Bagarstugan, 2×2, rågmjöl + vatten + ved ger knäckebröd ×3 på 30 sekunder.
+        // Produktionskedjor: Bagarstugan, 2×2, rågmjöl + vatten + ved ger knäckebröd ×3 på 18 sekunder
+        // (specen säger 30, kortat 2026-10-08 för snabbare matcher, se beslut.md).
         var data = TestData.Game;
         var b = data.Building("bagarstugan");
         Assert.Equal((2, 2), (b.Width, b.Height));
         var recipe = Assert.Single(b.Recipes);
-        Assert.Equal(300, recipe.Ticks);
+        Assert.Equal(180, recipe.Ticks);
         Assert.Equal(new[] { "ragmjol", "vatten", "ved" }, recipe.In.Select(a => data.Goods[a.Good].Id).Order());
         Assert.Equal(new GoodAmount(data.GoodIndex("knackebrod"), 3), Assert.Single(recipe.Out));
         // En 2×2 kostar 6 brädor och 3 sten.
@@ -124,7 +125,7 @@ public class GameDataTests
         // Det bästa står först, så att det äts först.
         Assert.Equal(data.Foods.Where(f => f.With < 0).OrderByDescending(f => f.Mood).Select(f => f.Good),
                      data.Foods.Where(f => f.With < 0).Select(f => f.Good));
-        Assert.Equal(60, data.Mood.TicksPerPoint);
+        Assert.Equal(90, data.Mood.TicksPerPoint); // specen säger 6 s, ändrat till 9 s 2026-10-08
         Assert.Equal(30, data.Mood.EatAt);
         Assert.Equal(1800, data.Mood.RestTicks);
     }
