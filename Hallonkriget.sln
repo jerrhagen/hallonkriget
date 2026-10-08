@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hallonkriget.Sim", "sim\Hallonkriget.Sim.csproj", "{7DB49010-1E7B-4E2C-A327-4A82D46F4A88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hallonkriget.Sim.Tests", "sim.tests\Hallonkriget.Sim.Tests.csproj", "{0EF5D95B-D625-4976-8F9E-28C59725FE64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hallonkriget.Sim.Cli", "sim.cli\Hallonkriget.Sim.Cli.csproj", "{7D184DB1-140D-4AA6-9376-749FF6628A16}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7DB49010-1E7B-4E2C-A327-4A82D46F4A88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DB49010-1E7B-4E2C-A327-4A82D46F4A88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DB49010-1E7B-4E2C-A327-4A82D46F4A88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DB49010-1E7B-4E2C-A327-4A82D46F4A88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EF5D95B-D625-4976-8F9E-28C59725FE64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EF5D95B-D625-4976-8F9E-28C59725FE64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EF5D95B-D625-4976-8F9E-28C59725FE64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EF5D95B-D625-4976-8F9E-28C59725FE64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D184DB1-140D-4AA6-9376-749FF6628A16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D184DB1-140D-4AA6-9376-749FF6628A16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D184DB1-140D-4AA6-9376-749FF6628A16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D184DB1-140D-4AA6-9376-749FF6628A16}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
