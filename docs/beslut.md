@@ -2,6 +2,17 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Alla byggnader och hela matkedjan (fas 2)
+
+- Alla 45 byggnader står i `buildings.json` och alla yrken i `professions.json`. Logen, vedtraven, hundkojan och hundgården, uppfinnarverkstans katapult och maskinhallens traktor gör inget förrän striden kommer i fas 3; rekryten och kaffedrängen kommer då också.
+- Åkerns sex odlingsrutor ligger 3×2 till höger om huset. Man kan gå över dem men inte bygga eller lägga stig där. Brödgårdens byggordning flyttades så att åkrarna får plats; kontrollfrågan för fas 1 håller fortfarande.
+- Det som tar slut, eftersom designdokumentet inte säger hur mycket: en ruta stenig mark ger 6 sten, en ruta skog 4 träd, en skrothög 12 skrot. Sedan blir rutan glänta. Skogshuggaren planterar en gran per två fällda, först i glesnad skog, annars på en glänta intill skogen.
+- Byggnader med recept man sällan vill turas om mellan börjar med ett valt: hönshuset ägg, grisstian grisar, köket pannkakor, smedjan järn, snickarboden verktyg. Spelaren kan byta.
+- Mjölkpallen byter 2 mjölk mot 1 kaffe en gång per speldag, när dagen börjar, inte på söndagar.
+- Matens bonusar verkar nu: pannkakor ger 10 procent fart och svagdricka 10 procent arbetstakt i tre minuter. Syltens anfallsbonus räknas men används först i fas 3.
+- Ny karta `hemmanet` (64×48) för att bygga en hel gård: skog, äng, hallonsnår, plommonträd, sjön, stenig mark, skrothögar, myr och landsväg. Ett test visar att all mat kommer fram till kafferepet där.
+- En gård med 55 personer, en kvarn och fem åkrar föder inte sig själv: kvarnen och åkrarna är flaskhalsen. Det är balans, och prövas i speltestet.
+
 ## 2026-10-08: sim.cli och kontrollfrågan för fas 1
 
 - `dotnet run --project sim.cli` spelar upp en byggordning från `data/ai/` på dess karta i `data/maps/` och skriver produktion per minut. Kontrollfrågan räknas på de sista 30 minuterna: knäckebröd i sex fönster om 5 minuter, inget fönster under hälften av det bästa, och ingen som ger upp av hunger.

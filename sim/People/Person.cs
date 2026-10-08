@@ -84,6 +84,11 @@ public sealed class Person
     /// <summary>Tick kvar tills humöret sjunker en enhet.</summary>
     public int MoodTimer { get; internal set; }
 
+    /// <summary>Tick kvar av bonusarna från maten: fart (pannkakor), arbete (svagdricka) och anfall (sylt).</summary>
+    public int SpeedBonusTicks { get; internal set; }
+    public int WorkBonusTicks { get; internal set; }
+    public int AttackBonusTicks { get; internal set; }
+
     internal readonly List<TilePoint> Path = new();
     internal int PathIndex;
 
@@ -126,6 +131,9 @@ public sealed class Person
         h.Add(Inside);
         h.Add(Mood);
         h.Add(MoodTimer);
+        h.Add(SpeedBonusTicks);
+        h.Add(WorkBonusTicks);
+        h.Add(AttackBonusTicks);
         h.Add(PathIndex);
         h.Add(Path.Count);
         foreach (var p in Path)

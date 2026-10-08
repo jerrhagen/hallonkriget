@@ -18,6 +18,9 @@ public sealed class Player
     /// <summary>Hur många av varje vara spelarens byggnader har tillverkat under matchen.</summary>
     public int[] Produced { get; }
 
+    /// <summary>Hur många av varje mat spelarens folk har ätit på kafferepet. Till Sixtens dagbok.</summary>
+    public int[] Eaten { get; }
+
     /// <summary>Hur många gånger någon av spelarens personer har gett upp av hunger.</summary>
     public int GaveUp { get; internal set; }
 
@@ -27,6 +30,7 @@ public sealed class Player
         Faction = faction;
         IsComputer = isComputer;
         Produced = new int[goodCount];
+        Eaten = new int[goodCount];
     }
 
     internal void AddToHash(ref StateHasher h)
@@ -35,6 +39,7 @@ public sealed class Player
         h.Add((byte)Faction);
         h.Add(IsComputer);
         h.AddSparse(Produced);
+        h.AddSparse(Eaten);
         h.Add(GaveUp);
     }
 }

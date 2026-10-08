@@ -1,5 +1,5 @@
 {
-  "_kommentar": "Byggnaderna i docs/produktionskedjor.md. Fas 1 har de som behövs för knäckebröd, plus stenröjaren, kafferepet, bygdegården, lanthandeln och rosteriet. Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (Arons beslut 2026-10-08).",
+  "_kommentar": "Byggnaderna i docs/produktionskedjor.md, alla 45 (stugan och mangårdsbyggnaden är en rad där). Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (Arons beslut 2026-10-08). default_recipe: receptet som är valt från början, annars turas byggnaden om. field: odlingsrutor till höger om byggnaden. daily: ett recept per speldag, på morgonen, inte på söndagar. gathers i ett recept gäller bara det receptet. Logen, vedtraven, hundkojan och hundgården gör inget förrän striden kommer i fas 3. per_tile i gathers: så mycket ger en ruta innan den blir glänta. plant_every: skogshuggaren planterar en gran per så många fällda.",
   "buildings": [
     {
       "id": "stugan",
@@ -91,7 +91,9 @@
       },
       "gathers": {
         "terrain": "forest",
-        "radius": 8
+        "radius": 8,
+        "per_tile": 4,
+        "plant_every": 2
       },
       "recipes": [
         {
@@ -168,7 +170,8 @@
       },
       "gathers": {
         "terrain": "stony",
-        "radius": 8
+        "radius": 8,
+        "per_tile": 6
       },
       "recipes": [
         {
@@ -238,6 +241,10 @@
           },
           "seconds": 40
         }
+      ],
+      "field": [
+        3,
+        2
       ]
     },
     {
@@ -385,6 +392,895 @@
           "seconds": 30
         }
       ]
+    },
+    {
+      "id": "kolmilan",
+      "name": "Kolmilan",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "kolare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "ved": 2
+          },
+          "out": {
+            "trakol": 1
+          },
+          "seconds": 40
+        }
+      ]
+    },
+    {
+      "id": "angen",
+      "name": "Ängen",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "slatterkarl",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "ho": 1
+          },
+          "seconds": 25
+        }
+      ],
+      "gathers": {
+        "terrain": "meadow",
+        "radius": 6
+      }
+    },
+    {
+      "id": "honshuset",
+      "name": "Hönshuset",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "honsvakterska",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "vete": 1
+          },
+          "out": {
+            "agg": 2
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "vete": 3
+          },
+          "out": {
+            "hona": 1
+          },
+          "seconds": 30
+        }
+      ],
+      "default_recipe": 0
+    },
+    {
+      "id": "gashagen",
+      "name": "Gåshagen",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "gasvaktare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "vete": 2
+          },
+          "out": {
+            "gas": 1
+          },
+          "seconds": 45
+        }
+      ]
+    },
+    {
+      "id": "grisstian",
+      "name": "Grisstian",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "grisskotare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "potatis": 1,
+            "ho": 1
+          },
+          "out": {
+            "gris": 1
+          },
+          "seconds": 45
+        },
+        {
+          "in": {
+            "potatis": 2,
+            "ho": 2
+          },
+          "out": {
+            "sugga": 1
+          },
+          "seconds": 45
+        }
+      ],
+      "default_recipe": 0
+    },
+    {
+      "id": "ladugarden",
+      "name": "Ladugården",
+      "size": [
+        3,
+        3
+      ],
+      "faction": "both",
+      "worker": "ladugardspiga",
+      "cost": {
+        "brador": 10,
+        "sten": 6
+      },
+      "recipes": [
+        {
+          "in": {
+            "ho": 1,
+            "vatten": 1
+          },
+          "out": {
+            "mjolk": 2
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "farhagen",
+      "name": "Fårhagen",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "faraherde",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "ho": 1
+          },
+          "out": {
+            "ull": 1
+          },
+          "seconds": 40
+        }
+      ]
+    },
+    {
+      "id": "fiskeboden",
+      "name": "Fiskeboden",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "fiskare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "abborre": 1
+          },
+          "seconds": 35
+        }
+      ],
+      "next_to": "water"
+    },
+    {
+      "id": "barplockarstugan",
+      "name": "Bärplockarstugan",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "barplockare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "hallon": 1
+          },
+          "seconds": 25,
+          "gathers": {
+            "terrain": "raspberry_thicket",
+            "radius": 10
+          }
+        },
+        {
+          "in": {},
+          "out": {
+            "kart": 1
+          },
+          "seconds": 25,
+          "gathers": {
+            "terrain": "plum_tree",
+            "radius": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "koket",
+      "name": "Köket",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "kokerska",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "mjol": 1,
+            "agg": 1,
+            "mjolk": 1,
+            "ved": 1
+          },
+          "out": {
+            "pannkakor": 2
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "agg": 2,
+            "vatten": 1,
+            "ved": 1
+          },
+          "out": {
+            "hardkokta_agg": 10
+          },
+          "seconds": 30
+        }
+      ],
+      "default_recipe": 0
+    },
+    {
+      "id": "mejeristugan",
+      "name": "Mejeristugan",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "mejerska",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "mjolk": 2
+          },
+          "out": {
+            "smor": 1
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "syltkoket",
+      "name": "Syltkoket",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "syltkokerska",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "hallon": 2,
+            "honung": 1,
+            "ved": 1
+          },
+          "out": {
+            "sylt": 2
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "hallon": 2,
+            "socker": 1,
+            "ved": 1
+          },
+          "out": {
+            "sylt": 2
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "slakteriet",
+      "name": "Slakteriet",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "slaktare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "gris": 1
+          },
+          "out": {
+            "kott": 2,
+            "skinn": 1
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "rokeriet",
+      "name": "Rökeriet",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "rokare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "kott": 1,
+            "ved": 1
+          },
+          "out": {
+            "korv": 2
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "bryggstugan",
+      "name": "Bryggstugan",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "bryggare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "rag": 1,
+            "vatten": 1,
+            "ved": 1
+          },
+          "out": {
+            "svagdricka": 3
+          },
+          "seconds": 35
+        }
+      ]
+    },
+    {
+      "id": "skrotboden",
+      "name": "Skrotboden",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "skrotsamlare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "skrot": 1
+          },
+          "seconds": 30
+        }
+      ],
+      "gathers": {
+        "terrain": "scrap_heap",
+        "radius": 8,
+        "per_tile": 12
+      }
+    },
+    {
+      "id": "smedjan",
+      "name": "Smedjan",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "smed",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "skrot": 1,
+            "trakol": 1
+          },
+          "out": {
+            "jarn": 1
+          },
+          "seconds": 35
+        },
+        {
+          "in": {
+            "jarn": 1,
+            "brador": 1
+          },
+          "out": {
+            "hogaffel": 1
+          },
+          "seconds": 35
+        },
+        {
+          "in": {
+            "salt": 1,
+            "jarn": 1
+          },
+          "out": {
+            "saltpatroner": 6
+          },
+          "seconds": 35
+        }
+      ],
+      "default_recipe": 0
+    },
+    {
+      "id": "platslageriet",
+      "name": "Plåtslageriet",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "platslagare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "jarn": 1
+          },
+          "out": {
+            "kastrullock": 1
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "jarn": 1
+          },
+          "out": {
+            "syfingerborgar": 10
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "snickarboden",
+      "name": "Snickarboden",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "snickare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "brador": 1,
+            "jarn": 1
+          },
+          "out": {
+            "verktyg": 1
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "brador": 1
+          },
+          "out": {
+            "rafsa": 1
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "brador": 2
+          },
+          "out": {
+            "tralans": 1
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "brador": 1
+          },
+          "out": {
+            "bricka": 1
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "brador": 1,
+            "lader": 1
+          },
+          "out": {
+            "slangbella": 1
+          },
+          "seconds": 30
+        }
+      ],
+      "default_recipe": 0
+    },
+    {
+      "id": "spinnstugan",
+      "name": "Spinnstugan",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "spinnerska",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "ull": 1
+          },
+          "out": {
+            "garn": 2
+          },
+          "seconds": 25
+        }
+      ]
+    },
+    {
+      "id": "stickstugan",
+      "name": "Stickstugan",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "stickerska",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "garn": 1
+          },
+          "out": {
+            "stickad_mossa": 1
+          },
+          "seconds": 30
+        },
+        {
+          "in": {
+            "garn": 2
+          },
+          "out": {
+            "lovikkavantar": 1
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "garveriet",
+      "name": "Garveriet",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "garvare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "skinn": 1,
+            "ved": 1
+          },
+          "out": {
+            "lader": 1
+          },
+          "seconds": 40
+        }
+      ]
+    },
+    {
+      "id": "sadelmakeriet",
+      "name": "Sadelmakeriet",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "sadelmakare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "lader": 2,
+            "brador": 1
+          },
+          "out": {
+            "sadel": 1
+          },
+          "seconds": 40
+        }
+      ]
+    },
+    {
+      "id": "logen",
+      "name": "Logen",
+      "size": [
+        3,
+        3
+      ],
+      "faction": "both",
+      "cost": {
+        "brador": 10,
+        "sten": 6
+      },
+      "beds": 20
+    },
+    {
+      "id": "vedtraven",
+      "name": "Vedtraven",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "vedkastare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      }
+    },
+    {
+      "id": "hundkojan",
+      "name": "Hundkojan",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      }
+    },
+    {
+      "id": "uppfinnarverkstan",
+      "name": "Uppfinnarverkstan",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "torpet",
+      "worker": "uppfinnare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "brador": 1,
+            "jarn": 1
+          },
+          "out": {
+            "hjul": 1
+          },
+          "seconds": 40
+        }
+      ]
+    },
+    {
+      "id": "bikuporna",
+      "name": "Bikuporna",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "torpet",
+      "worker": "biodlare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "honung": 1
+          },
+          "seconds": 40
+        }
+      ],
+      "next_to": "meadow",
+      "gathers": {
+        "terrain": "meadow",
+        "radius": 4
+      }
+    },
+    {
+      "id": "maskinhallen",
+      "name": "Maskinhallen",
+      "size": [
+        3,
+        3
+      ],
+      "faction": "storgarden",
+      "worker": "maskinist",
+      "cost": {
+        "brador": 10,
+        "sten": 6
+      },
+      "recipes": [
+        {
+          "in": {
+            "brador": 1,
+            "jarn": 1
+          },
+          "out": {
+            "hjul": 1
+          },
+          "seconds": 40
+        }
+      ]
+    },
+    {
+      "id": "mjolkpallen",
+      "name": "Mjölkpallen",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "storgarden",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "mjolk": 2
+          },
+          "out": {
+            "kaffe": 1
+          },
+          "seconds": 1
+        }
+      ],
+      "next_to": "road",
+      "daily": true
+    },
+    {
+      "id": "hundgarden",
+      "name": "Hundgården",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "storgarden",
+      "worker": "hundforare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      }
     }
   ]
 }

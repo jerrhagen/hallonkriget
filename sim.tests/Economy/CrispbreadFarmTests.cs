@@ -38,17 +38,18 @@ public class CrispbreadFarmTests
         farm.Place("stenrojarboden", 34, 11);
         farm.Place("kafferepet", 13, 10);
         farm.Place("boden", 15, 10);
-        farm.Place("brunnen", 19, 11);
+        farm.Place("brunnen", 23, 13);
         // Tre åkrar med råg och två bagarstugor. En person äter ett knäckebröd var tredje minut, och
-        // en åker räcker till ungefär fyra knäckebröd i minuten. Gården har 19 personer.
-        foreach (int x in new[] { 22, 17, 24 })
+        // en åker räcker till ungefär fyra knäckebröd i minuten. Gården har 19 personer. Varje åker har
+        // sina sex odlingsrutor till höger.
+        foreach (var (x, y) in new[] { (22, 10), (17, 10), (17, 13) })
         {
-            var aker = farm.Place("akern", x, 10);
+            var aker = farm.Place("akern", x, y);
             farm.Command(CommandType.SelectRecipe, aker.Id, 1); // råg
         }
-        farm.Place("kvarnen", 26, 10);
-        farm.Place("bagarstugan", 30, 10);
-        farm.Place("bagarstugan", 28, 10);
+        farm.Place("kvarnen", 27, 10);
+        farm.Place("bagarstugan", 31, 10);
+        farm.Place("bagarstugan", 29, 10);
 
         // Sex arbetare finns från start. Resten läggs till direkt, i stället för bygdegården.
         var door = farm.Home.Entrance;

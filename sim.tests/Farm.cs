@@ -23,6 +23,12 @@ public sealed class Farm
             Data: TestData.Game));
     }
 
+    private Farm(GameState state) => State = state;
+
+    /// <summary>En gård på en karta från data/maps, med stugan på kartans första startplats.</summary>
+    public static Farm OnMap(string mapId, Faction faction = Faction.Torpet) =>
+        new(GameState.NewMatch(MatchSetup.OnMap(7, TestData.Map(mapId), TestData.Game, (faction, false))));
+
     public int G(string id) => Data.GoodIndex(id);
 
     public Building Home => State.Buildings[0];
