@@ -18,6 +18,9 @@ public enum CommandType : byte
 
     /// <summary>Välj recept. A: byggnadens id, B: receptets nummer, eller -1 för att turas om.</summary>
     SelectRecipe = 4,
+
+    /// <summary>Planera en stig på en ruta. A och B: rutan. En hantlangare trampar upp den.</summary>
+    PlanPath = 5,
 }
 
 /// <summary>Ett kommando: vem, när, vad och upp till tre heltalsparametrar.</summary>

@@ -2,6 +2,16 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Personer och leveranser i fas 1
+
+- 1,2 rutor per sekund är farten på upptrampad stig. På gräs går det hälften så fort, i skog en fjärdedel. Då hinner en bärare ungefär 3 leveranser per minut på en tät gård, som designdokumentet räknar med.
+- Alla går lika fort tills vidare. Drängarnas 0,8 rutor per sekund och två varor i taget kommer med humöret och lägren.
+- Två på samma stigruta, den tredje väntar. Efter en sekund tränger den sig förbi, så att möten ger köer men aldrig låser gården.
+- Byggplatser får material i den ordning de placerades. Utan det sprids brädorna ut på alla byggen och inget blir klart.
+- Färdiga byggnader delar på knappa varor: begäran tas i omgångar. Annars tar sågboden allt timmer och vedboden får inget.
+- Ett förråd tar emot överskott av en vara bara upp till en fjärdedel av sin plats (boden 50, stugan 7). Annars fyller vatten och sten upp boden så att inget annat får plats. Det som en byggnad begär går alltid fram.
+- Tester får skapa arbetare direkt tills bygdegården finns.
+
 ## 2026-10-08: Byggnaderna i fas 1
 
 - Byggtid när materialet finns: 60, 90 och 120 sekunder för 1×1, 2×2 och 3×3 ("en liten byggnad tar ungefär en minut"). Kan sättas per byggnad med `build_seconds`.

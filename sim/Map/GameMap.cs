@@ -110,9 +110,7 @@ public sealed class GameMap
         h.Add(Height);
         for (int i = 0; i < _terrain.Length; i++)
         {
-            h.Add((byte)_terrain[i]);
-            h.Add((byte)_path[i]);
-            h.Add(_owner[i]);
+            h.Add((uint)_terrain[i] | (uint)_path[i] << 8 | (uint)_owner[i] << 16);
             h.Add(_occupant[i]);
         }
     }

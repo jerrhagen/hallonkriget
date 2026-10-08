@@ -5,6 +5,7 @@ using Hallonkriget.Sim.Commands;
 using Hallonkriget.Sim.Data;
 using Hallonkriget.Sim.Determinism;
 using Hallonkriget.Sim.Map;
+using Hallonkriget.Sim.People;
 
 namespace Hallonkriget.Sim;
 
@@ -12,7 +13,7 @@ namespace Hallonkriget.Sim;
 /// Hela spelets tillstånd. Kärnan är en funktion: Tick(kommandon). Samma tillstånd och samma
 /// kommandon ger exakt samma nya tillstånd på alla datorer. Se determinismreglerna i CLAUDE.md.
 /// </summary>
-public sealed class GameState
+public sealed partial class GameState
 {
     public const int TicksPerSecond = 10;
 
@@ -52,7 +53,7 @@ public sealed class GameState
         for (int i = 0; i < setup.Players.Count; i++)
         {
             var p = setup.Players[i];
-            state._players.Add(new Player((byte)i, p.Faction, p.IsComputer));
+            state._players.Add(new Player((byte)i, p.Faction, p.IsComputer, state.Data.Goods.Count));
         }
         for (int i = 0; i < setup.Players.Count; i++)
         {
@@ -60,7 +61,11 @@ public sealed class GameState
             var def = state.StartBuildingFor(setup.Players[i].Faction);
             if (!state.CanPlace((byte)i, def, start, ignoreBuildable: true))
                 throw new ArgumentException($"Spelare {i} kan inte börja på {start}");
-            state.AddBuilding((byte)i, def, start).CompleteAtOnce(def.StartStock);
+            var home = state.AddBuilding((byte)i, def, start);
+            home.CompleteAtOnce(def.StartStock);
+            // Designdokumentet: tre bärare och två hantlangare från start.
+            for (int k = 0; k < 3; k++) state.SpawnPerson((byte)i, PersonRole.Carrier, home.Entrance);
+            for (int k = 0; k < 2; k++) state.SpawnPerson((byte)i, PersonRole.Laborer, home.Entrance);
         }
         return state;
     }
@@ -72,7 +77,8 @@ public sealed class GameState
     public void Tick(IReadOnlyList<Command> commands)
     {
         ApplyCommands(commands);
-        MovePeople();
+        MoveWalkers();
+        UpdatePeople();
         UpdateProduction();
         MatchDeliveries();
         UpdateMood();
@@ -89,15 +95,12 @@ public sealed class GameState
         h.Add(Rng.State);
         Map.AddToHash(ref h);
         h.Add(_players.Count);
-        foreach (var p in _players)
-        {
-            h.Add(p.Id);
-            h.Add((byte)p.Faction);
-            h.Add(p.IsComputer);
-        }
+        foreach (var p in _players) p.AddToHash(ref h);
         h.Add(Data.Fingerprint);
         h.Add(_buildings.Count);
         foreach (var b in _buildings) b.AddToHash(ref h);
+        AddPeopleToHash(ref h);
+        AddDeliveriesToHash(ref h);
         h.Add(_nextWalkerId);
         h.Add(_walkers.Count);
         foreach (var w in _walkers) w.AddToHash(ref h);
@@ -124,6 +127,9 @@ public sealed class GameState
                 case CommandType.PlaceBuilding:
                     if (c.A >= 0 && c.A < Data.Buildings.Count)
                         TryPlaceBuilding(c.Player, Data.Buildings[c.A], new TilePoint(c.B, c.C));
+                    break;
+                case CommandType.PlanPath:
+                    PlanPath(c.Player, new TilePoint(c.A, c.B));
                     break;
                 case CommandType.SelectRecipe:
                     if (c.A >= 0 && c.A < _buildings.Count && _buildings[c.A].Owner == c.Player)
@@ -234,7 +240,7 @@ public sealed class GameState
         return null;
     }
 
-    private void MovePeople()
+    private void MoveWalkers()
     {
         foreach (var w in _walkers)
         {
@@ -270,9 +276,13 @@ public sealed class GameState
     // Stegen nedan fylls i under fas 1 och 3. Ordningen är fast och står i CLAUDE.md.
     private void UpdateProduction()
     {
-        foreach (var b in _buildings) b.UpdateProduction(Map);
+        foreach (var b in _buildings)
+        {
+            var done = b.UpdateProduction(Map);
+            if (done is null) continue;
+            foreach (var a in done.Out) _players[b.Owner].Produced[a.Good] += a.Count;
+        }
     }
-    private void MatchDeliveries() { }
     private void UpdateMood() { }
     private void ResolveCombat() { }
     private void RunComputerPlayers() { }

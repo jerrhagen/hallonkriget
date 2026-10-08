@@ -1,5 +1,12 @@
 # Economy
 
-Varor, lager, begäran och erbjudande, leveranser. Var 5:e tick paras begäran ihop med närmaste erbjudande och närmaste lediga bärare. Fas 1.
+Leveranssystemet (`GameState.Deliveries.cs`), som i designdokumentet: begäran, erbjudande och bärare. Var 5:e tick:
 
-Se docs/designdokument.md (Bärare och logistik) och docs/implementationsplan.md (Leveranser).
+1. Byggplatser i den ordning de placerades får sitt material, hela vägen för den första innan nästa.
+2. Färdiga byggnader begär det inlagret har plats för. De tas i omgångar, en vara per byggnad och omgång, och den som börjar flyttas ett steg varje gång, så att en knapp vara delas.
+3. Varje begäran får närmaste erbjudande (producenter före förråd) och den lediga bärare som står närmast varan.
+4. Det ingen begär bärs till närmaste förråd, men bara tills förrådet har en fjärdedel av sin plats av den varan.
+
+En `Delivery` reserverar varan i avsändaren (`Outgoing`) och platsen hos mottagaren (`Incoming`). Tar mottagaren inte emot varan när bäraren kommer fram, bärs den till närmaste förråd.
+
+Inte här än: prioritet per byggnad, spärrar per vara i boden, vägar som cachas mellan byggnader.

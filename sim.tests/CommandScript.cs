@@ -40,8 +40,10 @@ public static class CommandScript
                 int kind = rng.Range(0, 99);
                 if (kind < 30)
                     list.Add(new Command(t, player, CommandType.SpawnWalker, x, y));
-                else if (kind < 70)
+                else if (kind < 60)
                     list.Add(new Command(t, player, CommandType.MoveWalker, rng.Range(0, 400), x, y));
+                else if (kind < 75)
+                    list.Add(new Command(t, player, CommandType.PlanPath, x, y));
                 else if (kind < 90)
                     list.Add(new Command(t, player, CommandType.PlaceBuilding, rng.Range(-1, 12), x, y));
                 else
