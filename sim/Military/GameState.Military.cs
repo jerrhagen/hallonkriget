@@ -381,6 +381,11 @@ public sealed partial class GameState
             p.Target = -1;
             if (p.Group < 0) JoinGroup(p);
         }
+        if (u.Server)
+        {
+            UpdateServer(p, u);
+            return;
+        }
         if (p.StepProgress < p.StepTotal)
         {
             p.StepProgress += EffectiveSpeed(p);

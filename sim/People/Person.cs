@@ -100,6 +100,14 @@ public sealed class Person
     /// <summary>Fienden soldaten slåss mot just nu: personens id, eller -1.</summary>
     public int Foe { get; internal set; } = -1;
 
+    /// <summary>Kafferasten pågår och soldaten har inte fått sin kopp än.</summary>
+    public bool CoffeeDue { get; internal set; }
+
+    /// <summary>Kaffedrängens bricka: koppar kaffe, portioner mat och vilken mat.</summary>
+    public int TrayCoffee { get; internal set; }
+    public int TrayFood { get; internal set; }
+    public int TrayFoodGood { get; internal set; } = -1;
+
     /// <summary>Fiendebyggnaden soldaten slår på (gärdsgård, vedtrave, hundkoja), eller -1.</summary>
     public int FoeBuilding { get; internal set; } = -1;
 
@@ -195,6 +203,10 @@ public sealed class Person
         h.Add(Fuel);
         h.Add(Foe);
         h.Add(FoeBuilding);
+        h.Add(CoffeeDue);
+        h.Add(TrayCoffee);
+        h.Add(TrayFood);
+        h.Add(TrayFoodGood);
         h.Add(PathIndex);
         h.Add(Path.Count);
         foreach (var p in Path)

@@ -19,6 +19,7 @@ public sealed partial class GameState
 
     private void ResolveCombat()
     {
+        CoffeeBreak();
         foreach (var p in _people)
         {
             if (p.Role != PersonRole.Soldier) continue;
