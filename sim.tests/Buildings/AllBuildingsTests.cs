@@ -64,7 +64,8 @@ public class AllBuildingsTests
             "kafferepet", "logen", "lanthandeln", "vedtraven", "hundkojan", "uppfinnarverkstan", "bikuporna",
             "rosteriet", "maskinhallen", "mjolkpallen", "hundgarden",
         };
-        Assert.Equal(table.Order(), Data.Buildings.Select(b => b.Id).Order());
+        // Gärdsgård och staket (fas 3) är inte byggnader i tabellen utan försvar som läggs ruta för ruta.
+        Assert.Equal(table.Order(), Data.Buildings.Where(b => !b.IsWall).Select(b => b.Id).Order());
         Assert.Equal(54, Data.Goods.Count);
     }
 
@@ -72,7 +73,7 @@ public class AllBuildingsTests
     public void SizesAndCostsFollowTheTable()
     {
         // En 1×1 kostar 3 + 1, en 2×2 6 + 3, en 3×3 10 + 6.
-        foreach (var b in Data.Buildings.Where(b => b.Buildable))
+        foreach (var b in Data.Buildings.Where(b => b.Buildable && !b.IsWall))
         {
             Assert.Equal(b.Width, b.Height);
             var (boards, stone) = b.Width switch { 1 => (3, 1), 2 => (6, 3), _ => (10, 6) };

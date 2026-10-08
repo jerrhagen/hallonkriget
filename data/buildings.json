@@ -1,5 +1,5 @@
 {
-  "_kommentar": "Byggnaderna i docs/produktionskedjor.md, alla 45 (stugan och mangårdsbyggnaden är en rad där). Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (Arons beslut 2026-10-08). default_recipe: receptet som är valt från början, annars turas byggnaden om. field: odlingsrutor till höger om byggnaden. daily: ett recept per speldag, på morgonen, inte på söndagar. gathers i ett recept gäller bara det receptet. barracks: logen, som tar emot utrustningen i units.json och gör soldater av rekryter. per_tile i gathers: så mycket ger en ruta innan den blir glänta. plant_every: skogshuggaren planterar en gran per så många fällda.",
+  "_kommentar": "Byggnaderna i docs/produktionskedjor.md, alla 45 (stugan och mangårdsbyggnaden är en rad där). Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (Arons beslut 2026-10-08). default_recipe: receptet som är valt från början, annars turas byggnaden om. field: odlingsrutor till höger om byggnaden. daily: ett recept per speldag, på morgonen, inte på söndagar. gathers i ett recept gäller bara det receptet. wall: gärdsgård och staket, en ruta i taget, med hållfastheten. barracks: logen, som tar emot utrustningen i units.json och gör soldater av rekryter. per_tile i gathers: så mycket ger en ruta innan den blir glänta. plant_every: skogshuggaren planterar en gran per så många fällda.",
   "buildings": [
     {
       "id": "stugan",
@@ -1137,6 +1137,26 @@
       "barracks": true
     },
     {
+      "id": "gardsgard",
+      "name": "Gärdsgård",
+      "size": [1, 1],
+      "faction": "both",
+      "cost": { "sten": 1 },
+      "build_seconds": 20,
+      "beds": 0,
+      "wall": 60
+    },
+    {
+      "id": "staket",
+      "name": "Staket",
+      "size": [1, 1],
+      "faction": "both",
+      "cost": { "brador": 1 },
+      "build_seconds": 10,
+      "beds": 0,
+      "wall": 30
+    },
+    {
       "id": "vedtraven",
       "name": "Vedtraven",
       "size": [
@@ -1161,7 +1181,8 @@
       "cost": {
         "brador": 3,
         "sten": 1
-      }
+      },
+      "beds": 0
     },
     {
       "id": "uppfinnarverkstan",

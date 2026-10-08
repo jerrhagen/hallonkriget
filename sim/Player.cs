@@ -27,6 +27,16 @@ public sealed class Player
     /// <summary>Soldater och djur som har gett upp i fält.</summary>
     public int SoldiersLost { get; internal set; }
 
+    /// <summary>Av dem: djuren (höns och gäss).</summary>
+    public int AnimalsLost { get; internal set; }
+
+    /// <summary>Fiendebyggnader spelaren har tagit.</summary>
+    public int BuildingsTaken { get; internal set; }
+
+    /// <summary>Alla förråd är tagna och inga soldater finns kvar.</summary>
+    public bool Defeated { get; internal set; }
+    public int DefeatedAt { get; internal set; }
+
     /// <summary>Hur många figurer av varje enhet logen har gjort.</summary>
     public int[] Equipped { get; }
 
@@ -49,6 +59,10 @@ public sealed class Player
         h.AddSparse(Eaten);
         h.Add(GaveUp);
         h.Add(SoldiersLost);
+        h.Add(AnimalsLost);
+        h.Add(BuildingsTaken);
+        h.Add(Defeated);
+        h.Add(DefeatedAt);
         h.AddSparse(Equipped);
     }
 }

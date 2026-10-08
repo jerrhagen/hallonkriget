@@ -112,6 +112,7 @@ public sealed partial class GameState
         AddPeopleToHash(ref h);
         AddDeliveriesToHash(ref h);
         AddMilitaryToHash(ref h);
+        AddDefenceToHash(ref h);
         h.Add(_nextWalkerId);
         h.Add(_walkers.Count);
         foreach (var w in _walkers) w.AddToHash(ref h);
@@ -181,6 +182,9 @@ public sealed partial class GameState
                 case CommandType.HaltGroup:
                     HaltGroup(c.Player, c.A);
                     break;
+                case CommandType.PlaceTrap:
+                    PlanTrap(c.Player, new TilePoint(c.A, c.B));
+                    break;
             }
         }
     }
@@ -243,6 +247,7 @@ public sealed partial class GameState
         foreach (var p in Building.FieldTiles(def, origin))
             if (!FreeToBuild(player, p)) return false;
 
+        if (def.FixedUnit >= 0 && Data.Units[def.FixedUnit].Eats >= 0 && !DogHouseAllowed(player)) return false;
         var door = Building.EntranceFor(def, origin);
         if (!Map.Inside(door) || !Map.IsWalkable(door, MoveClass.Foot)) return false;
         if (def.NextTo is { } terrain && !TerrainAround(def, origin, terrain)) return false;
@@ -255,7 +260,7 @@ public sealed partial class GameState
         if (!Map.Inside(p) || !TerrainRules.IsBuildable(Map.TerrainAt(p)) || Map.OccupantAt(p) != 0) return false;
         if (Map.OwnerAt(p) != GameMap.NoOwner && Map.OwnerAt(p) != player) return false;
         foreach (var other in _buildings)
-            if (other.Entrance == p) return false;
+            if (other.Entrance == p && other.Stage != BuildingStage.Ruined) return false;
         return true;
     }
 
@@ -367,6 +372,7 @@ public sealed partial class GameState
         UpdateSchools();
         foreach (var b in _buildings)
         {
+            if (b.IsTaken) continue;
             int bonus = b.HasWorker && FindPerson(b.WorkerId) is { WorkBonusTicks: > 0 } ? Data.BonusPercent(FoodBonus.Work) : 0;
             var done = b.UpdateProduction(TickCount, _gather ??= TryGather, closed: sunday, workBonus: bonus);
             if (done is null) continue;

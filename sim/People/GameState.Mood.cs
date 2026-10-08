@@ -207,7 +207,7 @@ public sealed partial class GameState
     {
         foreach (var b in _buildings)
         {
-            if (b.Def.School is null) continue;
+            if (b.Def.School is null || b.IsTaken) continue;
             var done = b.UpdateSchool(room: Population(b.Owner) < Beds(b.Owner));
             if (done is not null) SpawnProfession(b.Owner, done, b.Entrance);
         }

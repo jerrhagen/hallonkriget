@@ -1,3 +1,4 @@
+using Hallonkriget.Sim.Buildings;
 using Hallonkriget.Sim.Data;
 using Hallonkriget.Sim.Determinism;
 using Hallonkriget.Sim.Military;
@@ -27,9 +28,19 @@ public sealed partial class GameState
 
         foreach (var p in _people)
         {
-            if (p.Role != PersonRole.Soldier || p.Job != PersonJob.Soldiering || p.Foe < 0 || p.StrikeTimer > 0) continue;
+            if (p.Role != PersonRole.Soldier || p.Job != PersonJob.Soldiering || p.StrikeTimer > 0) continue;
             if (p.StepProgress < p.StepTotal) continue;
             var u = Data.Units[p.Unit];
+            if (p.Foe < 0)
+            {
+                if (p.FoeBuilding < 0) continue;
+                var b = _buildings[p.FoeBuilding];
+                if (!CanHit(p, u, b) || Chebyshev(p.Tile, b.Origin) > (u.IsRanged ? u.Range : u.Reach) || (u.IsRanged && p.Shots <= 0)) continue;
+                HitBuilding(p, u, b);
+                p.StrikeTimer = Data.Combat.StrikeTicks;
+                BurnFuel(p, u);
+                continue;
+            }
             if (FindPerson(p.Foe) is not { } foe || !IsTarget(p, foe)) continue;
             int d = Chebyshev(p.Tile, foe.Tile);
             if (u.IsRanged)
@@ -47,7 +58,14 @@ public sealed partial class GameState
             BurnFuel(p, u);
         }
 
-        if (TickCount % TicksPerSecond == 0) Scare();
+        FixedDefenders();
+        SpringTraps();
+        if (TickCount % TicksPerSecond == 0)
+        {
+            Scare();
+            Captures();
+            CheckVictory();
+        }
         RemoveLeavers();
     }
 
@@ -115,6 +133,25 @@ public sealed partial class GameState
                 Hurt(q, timid ? scare.PerSecond * 2 : scare.PerSecond, null);
             }
         }
+        ScareFromDogs();
+    }
+
+    /// <summary>Hunden i kojan skäller på höns och pysslingar.</summary>
+    private void ScareFromDogs()
+    {
+        foreach (var b in _buildings)
+        {
+            if (b.Def.FixedUnit < 0 || b.Stage != BuildingStage.Done || b.AwayUntil > 0 || b.IsTaken) continue;
+            if (Data.Units[b.Def.FixedUnit].Scare is not { } scare) continue;
+            foreach (var q in _people)
+            {
+                if (q.Owner == b.Owner || q.Inside || q.Job is PersonJob.Resting or PersonJob.ToHome || q.Mood <= 0) continue;
+                if (Chebyshev(b.Origin, q.Tile) > scare.Radius) continue;
+                bool timid = IsTimid(q);
+                if (scare.TimidOnly && !timid) continue;
+                Hurt(q, timid ? scare.PerSecond * 2 : scare.PerSecond, null);
+            }
+        }
     }
 
     /// <summary>Höns och pysslingar är extra känsliga för skräms.</summary>
@@ -141,6 +178,7 @@ public sealed partial class GameState
         if (u.Hero) return;
         if (u.Recruits == 0)
         {
+            _players[p.Owner].AnimalsLost++;
             RemovePerson(p);
             return;
         }

@@ -117,6 +117,9 @@ public sealed class UnitDef
     /// <summary>Byggnaden enheten sitter i (vedtraven, hundkojan), annars null.</summary>
     public string? Fixed { get; init; }
 
+    /// <summary>Det hunden i kojan äter, eller -1.</summary>
+    public int Eats { get; init; } = -1;
+
     public bool IsRanged => Range > 0;
 
     public bool AllowedFor(Faction faction) => Faction switch
@@ -202,6 +205,10 @@ public sealed class BuildingDef
 
     /// <summary>Enheten som sitter i byggnaden (vedtraven, hundkojan), eller -1.</summary>
     public int FixedUnit { get; internal set; } = -1;
+
+    /// <summary>Gärdsgård och staket: en ruta med hållfasthet, som hindrar alla utom de som slår sönder den.</summary>
+    public int Wall { get; init; }
+    public bool IsWall => Wall > 0;
 
     public bool IsStorage => Storage > 0;
 
@@ -457,6 +464,12 @@ public sealed class GameData
                 if (table > 0) foreach (var f in foods) accepts.Add(f.Good);
                 bool barracks = b.TryGetProperty("barracks", out var ba) && ba.GetBoolean();
                 if (barracks) accepts.AddRange(gear);
+                foreach (var u in units)
+                {
+                    if (u.Fixed != id) continue;
+                    if (u.Ammo is { } fa) accepts.Add(fa.Good);
+                    if (u.Eats >= 0) accepts.Add(u.Eats);
+                }
 
                 SchoolDef? school = null;
                 if (b.TryGetProperty("school", out var sc))
@@ -519,6 +532,7 @@ public sealed class GameData
                     ClosedSundays = b.TryGetProperty("closed_sundays", out var cs) && cs.GetBoolean(),
                     School = school,
                     Barracks = barracks,
+                    Wall = b.TryGetProperty("wall", out var wl) ? wl.GetInt32() : 0,
                     StockLimit = barracks ? combat.BarracksStock : Sim.Buildings.Building.StockLimit,
                 });
             }
@@ -593,6 +607,7 @@ public sealed class GameData
                 Hero = Flag("hero"),
                 HitOneIn = Int("hit_one_in"),
                 Fixed = u.TryGetProperty("fixed", out var fx) ? fx.GetString() : null,
+                Eats = u.TryGetProperty("eats", out var ea) ? good(ea.GetString()!, id) : -1,
             };
             if (unit.Mood <= 0 || unit.Squad <= 0 || unit.GroupMax <= 0 || unit.Recruits < 0 || unit.Attack < 0 || unit.Defence < 0)
                 throw new GameDataException($"{id}: siffrorna går inte ihop");
@@ -717,6 +732,7 @@ public sealed class GameData
             h.Add(b.Barracks);
             h.Add(b.StockLimit);
             h.Add(b.FixedUnit);
+            h.Add(b.Wall);
         }
         h.Add(Combat.StrikeTicks);
         h.Add(Combat.Sight);
@@ -757,6 +773,7 @@ public sealed class GameData
             h.Add(u.Hero);
             h.Add(u.HitOneIn);
             AddString(ref h, u.Fixed ?? "");
+            h.Add(u.Eats);
         }
         h.Add(Mood.Max);
         h.Add(Mood.TicksPerPoint);

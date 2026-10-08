@@ -2,6 +2,17 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Försvar, belägring och seger (fas 3)
+
+- Gärdsgård (1 sten, 20 sekunder, hållfasthet 60) och staket (1 bräda, 10 sekunder, hållfasthet 30) byggs ruta för ruta som små byggplatser. De står i `buildings.json` med `wall`, men räknas inte till de 45 byggnaderna. Utflyttning av tomtgränsen väntar till kampanjen.
+- Bara vedkatapulten, traktorn och fläskkavalleriet slår på gärdsgårdar och vedtravar. En grupp som inte kommer fram går mot närmaste fiendegärdsgård om den kan slå sönder den, annars står den kvar. En sönderslagen gärdsgård eller vedtrave blir en ruin som man kan gå över; man bygger en ny.
+- Hantlangare lagar skadade gärdsgårdar och vedtravar, 10 per 10 sekunder, efter byggen men före stigar.
+- Vedtraven kastar ett vedträ var 2:a sekund på närmaste fiende inom 5 rutor, så länge vedkastaren är där och det finns ved.
+- Hundkojan har sin hund från början. Hunden biter allt inom 2 rutor och skäller på höns och pysslingar. Alla kan slå på hunden; den som ger upp går hem och kommer tillbaka efter tre minuter. Den äter en korv när den har tappat minst 45. Torpet får en hundkoja (den lånade hunden), Storgården en till för varje hundgård.
+- Råttfällor: spelaren lägger ut, en hantlangare gillrar. Högst 10 per spelare.
+- En byggnad tas när en fiendesoldat står vid dörren i 20 sekunder och ingen egen soldat, vedtrave eller hund finns inom 4 rutor. Allt i lagren är borta. Byggnaden blir ägarens igen när ingen fiende har synts inom 4 rutor på 20 sekunder.
+- Segern: en spelare har förlorat när alla förråd (bodarna och stugan) är tagna och inga soldater finns kvar som inte är på väg hem. Gubben räknas som soldat.
+
 ## 2026-10-08: Logen, grupperna och striden (fas 3)
 
 - Enheterna står i `data/units.json` med siffrorna från designdokumentet. Fart i tiondels rutor per sekund på gräs.
