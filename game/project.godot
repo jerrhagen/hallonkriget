@@ -1,0 +1,29 @@
+; Engine configuration file.
+; Godot 4.4.1 .NET. Öppna med Godot 4.4 .NET-versionen.
+
+config_version=5
+
+[application]
+
+config/name="Hallonkriget"
+config/description="Stilprov för fas 0: ser det ut som en bilderbok?"
+run/main_scene="res://Scenes/Stilprov.tscn"
+config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[dotnet]
+
+project/assembly_name="Hallonkriget"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/canvas_textures/default_texture_filter=3
+environment/defaults/default_clear_color=Color(0.957, 0.925, 0.851, 1)

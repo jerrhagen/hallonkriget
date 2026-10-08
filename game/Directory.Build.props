@@ -1,0 +1,6 @@
+<Project>
+  <!-- Egen fil så att repots Directory.Build.props (varningar som fel) inte gäller Godots genererade kod. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+</Project>
