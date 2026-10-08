@@ -48,7 +48,7 @@ public static class CommandCodec
         return list;
     }
 
-    private static void WriteVarInt(Stream stream, int value)
+    internal static void WriteVarInt(Stream stream, int value)
     {
         uint zigzag = (uint)((value << 1) ^ (value >> 31));
         while (zigzag >= 0x80)
@@ -59,7 +59,7 @@ public static class CommandCodec
         stream.WriteByte((byte)zigzag);
     }
 
-    private static int ReadVarInt(Stream stream)
+    internal static int ReadVarInt(Stream stream)
     {
         uint result = 0;
         int shift = 0;
@@ -74,7 +74,7 @@ public static class CommandCodec
         return (int)(result >> 1) ^ -(int)(result & 1);
     }
 
-    private static byte ReadByte(Stream stream)
+    internal static byte ReadByte(Stream stream)
     {
         int b = stream.ReadByte();
         if (b < 0) throw new EndOfStreamException();

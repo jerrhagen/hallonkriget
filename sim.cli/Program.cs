@@ -11,16 +11,21 @@ using Hallonkriget.Sim.People;
 //
 //   dotnet run --project sim.cli -- [byggordning] [minuter] [frö]
 //   dotnet run --project sim.cli -- brodgarden 90
+//   dotnet run --project sim.cli -- brodgarden 10 --spela-in=sim.tests/Replays/brodgarden.hkr
 
-string orderId = args.Length > 0 ? args[0] : "brodgarden";
-int minutes = args.Length > 1 ? int.Parse(args[1]) : 90;
-ulong seed = args.Length > 2 ? ulong.Parse(args[2]) : 1958_07_14UL;
+var positional = args.Where(a => !a.StartsWith("--")).ToArray();
+string orderId = positional.Length > 0 ? positional[0] : "brodgarden";
+int minutes = positional.Length > 1 ? int.Parse(positional[1]) : 90;
+ulong seed = positional.Length > 2 ? ulong.Parse(positional[2]) : 1958_07_14UL;
+string? recordTo = args.FirstOrDefault(a => a.StartsWith("--spela-in="))?["--spela-in=".Length..];
 
 string dataDir = FindDataDir();
 var data = GameData.FromFiles(name => File.ReadAllText(Path.Combine(dataDir, name)));
 var order = BuildOrder.Parse(File.ReadAllText(Path.Combine(dataDir, "ai", orderId + ".json")), data);
 var map = MapDef.Parse(File.ReadAllText(Path.Combine(dataDir, "maps", order.MapId + ".json")));
-var state = GameState.NewMatch(MatchSetup.OnMap(seed, map, data, (Faction.Torpet, false)));
+var setup = MatchSetup.OnMap(seed, map, data, (Faction.Torpet, false));
+var state = GameState.NewMatch(setup);
+var replay = new Hallonkriget.Sim.Replay.Replay(seed, map, setup.Players, data.Fingerprint);
 var player = new BuildOrderPlayer(order, 0);
 
 int bread = data.GoodIndex("knackebrod");
@@ -36,7 +41,13 @@ var produced = new int[data.Goods.Count];
 for (int m = 1; m <= minutes; m++)
 {
     Array.Copy(state.Players[0].Produced, produced, produced.Length);
-    for (int t = 0; t < 60 * GameState.TicksPerSecond; t++) state.Tick(player.Next(state));
+    for (int t = 0; t < 60 * GameState.TicksPerSecond; t++)
+    {
+        var commands = player.Next(state);
+        replay.Record(state.TickCount, commands);
+        state.Tick(commands);
+        replay.AfterTick(state);
+    }
 
     var now = state.Players[0].Produced;
     perMinute.Add(now[bread] - produced[bread]);
@@ -82,6 +93,11 @@ if (args.Contains("--byggnader"))
         Console.WriteLine($"  {b.Id,2} {b.Def.Id,-17} {b.Stage,-12} {(b.HasWorker ? "arbetare" : (b.WorkerId >= 0 ? "ute" : "-")),-8}" +
             $" in {{{Goods(b.InputCount)}}} ut {{{Goods(b.OutputCount)}}}{queue}");
     }
+}
+if (recordTo is not null)
+{
+    File.WriteAllBytes(recordTo, replay.ToBytes());
+    Console.WriteLine($"Reprisen sparad: {recordTo}");
 }
 Console.WriteLine($"{minutes} minuter på {sw.ElapsedMilliseconds} ms, slutlig kontrollsumma {state.Hash():x16}");
 
