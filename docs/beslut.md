@@ -13,6 +13,10 @@ Beslut som tagits efter designdokumentet. Nyast överst.
 - Ny karta `hemmanet` (64×48) för att bygga en hel gård: skog, äng, hallonsnår, plommonträd, sjön, stenig mark, skrothögar, myr och landsväg. Ett test visar att all mat kommer fram till kafferepet där.
 - En gård med 55 personer, en kvarn och fem åkrar föder inte sig själv: kvarnen och åkrarna är flaskhalsen. Det är balans, och prövas i speltestet.
 
+## 2026-10-08: Fas 1 är klar
+
+- Kontrollfrågan för fas 1 är besvarad ja: Aron godkände att gården i `sim.cli` bakar knäckebröd i jämn takt i 30 minuter utan att bärarna fastnar. Fas 2 börjar, i en egen tråd i projektet.
+
 ## 2026-10-08: sim.cli och kontrollfrågan för fas 1
 
 - `dotnet run --project sim.cli` spelar upp en byggordning från `data/ai/` på dess karta i `data/maps/` och skriver produktion per minut. Kontrollfrågan räknas på de sista 30 minuterna: knäckebröd i sex fönster om 5 minuter, inget fönster under hälften av det bästa, och ingen som ger upp av hunger.
