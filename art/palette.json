@@ -1,0 +1,47 @@
+{
+  "_om": "Spelets färger. Torpets saker är röda och lappade, Storgårdens vita och nya. Läses av art/svglib.py.",
+
+  "blck": "#2b2119",
+  "blck_ljus": "#5a4a3b",
+  "papper": "#f4ecd9",
+
+  "falurott": "#a8402c",
+  "falurott_mork": "#7d2b1e",
+  "knutvirke": "#f1e9d6",
+  "bjorkvitt": "#ece7dc",
+  "mossgront": "#6c7d3a",
+  "mossgront_mork": "#4c5a29",
+  "halmgult": "#dcb653",
+  "halmgult_ljus": "#ecd58e",
+  "gratt_tra": "#8f897b",
+  "gratt_tra_mork": "#6b6558",
+  "granit": "#a29c93",
+  "granit_mork": "#79736b",
+  "takpapp": "#4f4a46",
+
+  "ang": "#a5b46a",
+  "ang_ljus": "#c4cd88",
+  "ang_mork": "#7d9149",
+  "jord": "#a8875f",
+  "jord_mork": "#7f6142",
+  "skugga": "#4a4033",
+
+  "agg": "#f3e8cf",
+  "agg_skugga": "#d9c6a0",
+  "hona_vit": "#f2ede0",
+  "hona_brun": "#b97a45",
+  "kam": "#c8392b",
+  "nabb": "#e0a43a",
+
+  "ull_gra": "#8c8478",
+  "ull_brun": "#8a6a4c",
+  "hud": "#e6b991",
+  "hud_rod": "#d98d6f",
+  "mossa_rod": "#b4473a",
+
+  "prastkrage": "#fbf6ea",
+  "smorblomma": "#f0c93a",
+  "blaklocka": "#7d86c4",
+  "klover": "#c9708e",
+  "emalj_bla": "#5d7ea6"
+}
