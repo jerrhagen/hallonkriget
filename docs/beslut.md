@@ -4,6 +4,8 @@ Beslut som tagits efter designdokumentet. Nyast överst.
 
 ## 2026-10-08: Stilprovet
 
+- Kontrollfrågan för fas 0 är besvarad ja: Aron tycker att stilprovet "ser fint ut". Stilen gäller, fas 1 börjar.
+
 - Renderaren är `gl_compatibility`, så att spelet går på äldre datorer och utan grafikkort i CI.
 - Grafiken renderas i 1× (128 px per ruta) och 2×. Spelet använder 2× nerskalad till hälften, med mipmaps, så att den är skarp både inzoomad och utzoomad.
 - Klippdockor byggs som platta `Node2D`-delar med pivotpunkter från `*_rig.json`, inte med `Skeleton2D`. Animationerna nycklas i kod i 12 bilder per sekund.
