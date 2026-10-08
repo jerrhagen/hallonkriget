@@ -21,7 +21,7 @@ art/         SVG-källor, palette.json, svg-biblioteket och render.py
 docs/        designdokumentet och beslut
 ```
 
-Varje mapp under `sim/` är en modul med ett tydligt gränssnitt och egna tester. En arbetssession tar en modul i taget.
+Speldatan läses av `sim/Data` till `GameData`. Varje mapp under `sim/` är en modul med ett tydligt gränssnitt och egna tester. En arbetssession tar en modul i taget.
 
 ## Kommandon
 

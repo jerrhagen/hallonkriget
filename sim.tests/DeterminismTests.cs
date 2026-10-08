@@ -34,11 +34,12 @@ public class DeterminismTests
         CommandScript.Run(state, script);
 
         Assert.True(state.Walkers.Count > 50, "Manuset ska skapa vandrare, annars testar det ingenting");
+        Assert.True(state.Buildings.Count > 30, "Manuset ska placera byggnader, annars testar det ingenting");
         Assert.Equal(GoldenHash, state.Hash());
     }
 
-    // Ändrad när kartan kom in i Hash() (fas 1, kartan och sökvägar).
-    private const ulong GoldenHash = 16130387360001207923UL;
+    // Ändrad när byggnaderna kom in i tillståndet och manuset (fas 1, byggnaderna).
+    private const ulong GoldenHash = 21820922164791246UL;
 
     [Fact]
     public void ReplayThroughByteFormatGivesSameHash()
