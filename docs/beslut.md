@@ -2,6 +2,12 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Gården i Godot (fas 2)
+
+- Spelet startar på kartan `hemmanet` som Torpet. Byggnader utom hönshuset är platshållare: ett hus i byggnadens färggrupp med namnskylt, falurött tak för Torpet och grått för Storgården. Personerna är pysslingen, tonad efter roll, med en lapp för varan de bär.
+- Gränssnittet är tills vidare papper och bläck: en rad överst med klocka, hastighet och folk, och en panel till vänster med flikarna Bygg, Förråd och Folk. En vald byggnad visar recept, lager med spärrar, bygdegårdens utbildning eller lanthandelns byten. Den slitna trälådan med emaljskyltar kommer i fas 5.
+- Spara och ladda är reprisfilen: snabbsparet ligger i Godots användarmapp under `spara/snabbspar.hkr` och laddas genom att matchen spelas upp till samma tick. Ett laddat spel börjar pausat.
+
 ## 2026-10-08: Alla byggnader och hela matkedjan (fas 2)
 
 - Alla 45 byggnader står i `buildings.json` och alla yrken i `professions.json`. Logen, vedtraven, hundkojan och hundgården, uppfinnarverkstans katapult och maskinhallens traktor gör inget förrän striden kommer i fas 3; rekryten och kaffedrängen kommer då också.

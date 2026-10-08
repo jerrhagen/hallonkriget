@@ -6,8 +6,8 @@ config_version=5
 [application]
 
 config/name="Hallonkriget"
-config/description="Stilprov för fas 0: ser det ut som en bilderbok?"
-run/main_scene="res://Scenes/Stilprov.tscn"
+config/description="Fas 2: en gård att bygga i 30 minuter utan strid. Stilprovet finns kvar i Scenes/Stilprov.tscn."
+run/main_scene="res://Scenes/Gard.tscn"
 config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
 
 [display]

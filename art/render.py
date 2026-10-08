@@ -34,11 +34,24 @@ ASSETS = [
     ("terrain", "terrain.ang"),
     ("terrain", "terrain.ang_ton"),
     ("terrain", "terrain.stig_prov"),
+    ("terrain", "terrain.terrang"),
+    ("terrain", "terrain.stigar"),
     ("ui", "ui.papper"),
 ]
 
 # Rutor läggs dessutom ihop till en atlas per terräng, för Godots TileSet.
-ATLASES = {"ang": ("terrain", [f"ang_{i}" for i in range(4)])}
+ATLASES = {
+    "ang": ("terrain", [f"ang_{i}" for i in range(4)]),
+    # Kartans terräng: en kolumn per terräng och variant, i ordningen i Terrain.cs.
+    "terrang": ("terrain", [f"terr_{t}_{v}" for t in
+                            ["glanta", "stenig", "skog", "ang", "myr", "vatten", "skrot", "hallonsnar", "plommon",
+                             "landsvag", "aker"] for v in range(2)]),
+    # Stigarna: en kolumn per kombination av grannar (1 norr, 2 öster, 4 söder, 8 väster).
+    "stigar": ("terrain", [f"stig_{m:02d}" for m in range(16)]),
+}
+
+# Rutor som bara behövs i sin atlas, inte som egna bilder.
+ATLAS_ONLY = set(ATLASES["terrang"][1]) | set(ATLASES["stigar"][1])
 
 # Bilder som bara behövs i en storlek
 ONLY_1X = {"papper", "ang_ton"}
@@ -66,7 +79,8 @@ def main() -> None:
                 img = render(svg, z)
                 rendered[name][z] = img
                 suffix = "" if z == 1 else f"@{z}x"
-                img.save(GAME_ART / category / f"{name}{suffix}.png", optimize=True)
+                if name not in ATLAS_ONLY:
+                    img.save(GAME_ART / category / f"{name}{suffix}.png", optimize=True)
             print(f"  {category}/{name}")
         if hasattr(module, "meta"):
             meta_name = module_name.split(".")[-1]
