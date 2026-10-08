@@ -33,6 +33,17 @@ python3 art/render.py               # SVG -> PNG (kräver: pip install resvg-py)
 
 Godot-projektet öppnas från `game/project.godot` med Godot 4.4 .NET.
 
+Utan fönster (Linux, `$GODOT` är Godot-binären):
+
+```
+$GODOT --headless --path game --import                     # importera nya bilder
+$GODOT --headless --path game --build-solutions --quit     # bygg C#
+xvfb-run -a -s "-screen 0 1280x720x24" $GODOT --path game --rendering-driver opengl3 \
+    --resolution 1280x720 -- --skarmbild=/tmp/bild.png --zoom=1.0   # skärmbild av stilprovet
+```
+
+Efter `art/render.py`: nya 2×-bilder ska ha `mipmaps/generate=true` i sin `.import`-fil.
+
 ## Determinismregler för sim/
 
 Kärnan är `GameState.Tick(kommandon)`. Samma tillstånd och samma kommandon ger exakt samma nya tillstånd, på alla datorer. Reglerna kontrolleras av `sim.tests`:
