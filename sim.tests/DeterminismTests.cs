@@ -38,11 +38,12 @@ public class DeterminismTests
         Assert.Contains(state.Buildings, b => b.Stage == Hallonkriget.Sim.Buildings.BuildingStage.Done && b.Def.Buildable);
         Assert.True(state.Map.AllTiles().Count(p => state.Map.PathAt(p) == Hallonkriget.Sim.Map.PathState.Trodden) > 10,
             "Hantlangarna ska ha trampat upp stigar");
+        Assert.True(state.Players.Any(p => p.GaveUp > 0), "Humöret ska ha tagit slut för någon");
         Assert.Equal(GoldenHash, state.Hash());
     }
 
-    // Ändrad när personer och leveranser kom in i tillståndet och manuset (fas 1).
-    private const ulong GoldenHash = 11690953144229706082UL;
+    // Ändrad när humör, kafferepet, bygdegården och lanthandeln kom in i tillståndet och manuset (fas 1).
+    private const ulong GoldenHash = 15473787137003163390UL;
 
     [Fact]
     public void ReplayThroughByteFormatGivesSameHash()

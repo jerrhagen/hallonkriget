@@ -75,19 +75,23 @@ public class DeliveryTests
     }
 
     [Fact]
-    public void ReservationsBalanceWhenEverythingIsDone()
+    public void ReservationsMatchTheDeliveriesUnderWay()
     {
         var farm = new Farm(start: new TilePoint(5, 5));
         var a = farm.Place("vedboden", 12, 6);
         var b = farm.Place("brunnen", 12, 10);
         var c = farm.Place("stenrojarboden", 16, 6);
         farm.RunUntil(() => new[] { a, b, c }.All(x => x.Stage == BuildingStage.Done), 8000, "alla byggda");
-        farm.Run(100);
-        foreach (var building in farm.State.Buildings)
-        for (int g = 0; g < farm.Data.Goods.Count; g++)
+        for (int round = 0; round < 20; round++)
         {
-            Assert.Equal(0, building.Incoming[g]);
-            Assert.Equal(0, building.Outgoing[g]);
+            farm.Run(37);
+            var deliveries = farm.State.Deliveries;
+            foreach (var building in farm.State.Buildings)
+            for (int g = 0; g < farm.Data.Goods.Count; g++)
+            {
+                Assert.Equal(deliveries.Count(d => d.To == building.Id && d.Good == g), building.Incoming[g]);
+                Assert.Equal(deliveries.Count(d => d.From == building.Id && d.Good == g && !d.PickedUp), building.Outgoing[g]);
+            }
         }
     }
 

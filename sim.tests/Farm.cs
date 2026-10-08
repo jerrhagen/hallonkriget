@@ -38,6 +38,20 @@ public sealed class Farm
         return State.Buildings[^1];
     }
 
+    /// <summary>Placerar en byggnad som är färdig direkt, utan material och hantlangare.</summary>
+    public Building PlaceDone(string id, int x, int y)
+    {
+        var b = Place(id, x, y);
+        b.CompleteAtOnce(Array.Empty<GoodAmount>());
+        return b;
+    }
+
+    /// <summary>Lägger varor direkt i en byggnads inlager.</summary>
+    public void Put(Building b, string good, int count = 1)
+    {
+        for (int i = 0; i < count; i++) Assert.True(b.PutInput(G(good)), $"{b.Def.Id} tog inte emot {good}");
+    }
+
     /// <summary>Planerar en rak eller vinklad stig, ruta för ruta, från a till b (först i x, sedan i y).</summary>
     public void PlanPath(TilePoint a, TilePoint b)
     {

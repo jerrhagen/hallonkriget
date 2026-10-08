@@ -45,9 +45,15 @@ public static class CommandScript
                 else if (kind < 75)
                     list.Add(new Command(t, player, CommandType.PlanPath, x, y));
                 else if (kind < 90)
-                    list.Add(new Command(t, player, CommandType.PlaceBuilding, rng.Range(-1, 12), x, y));
+                    list.Add(new Command(t, player, CommandType.PlaceBuilding, rng.Range(-1, 16), x, y));
+                else if (kind < 95)
+                    list.Add(new Command(t, player, CommandType.SelectRecipe, rng.Range(-1, 60), rng.Range(-2, 8)));
+                else if (kind < 98)
+                    list.Add(new Command(t, player, CommandType.Train, rng.Range(-1, 60), rng.Range(-1, 13)));
+                else if (kind < 99)
+                    list.Add(new Command(t, player, CommandType.BlockGood, rng.Range(-1, 60), rng.Range(-1, 55), rng.Range(0, 1)));
                 else
-                    list.Add(new Command(t, player, CommandType.SelectRecipe, rng.Range(-1, 60), rng.Range(-2, 3)));
+                    list.Add(new Command(t, player, CommandType.CancelTraining, rng.Range(-1, 60)));
             }
             perTick[t] = list;
         }

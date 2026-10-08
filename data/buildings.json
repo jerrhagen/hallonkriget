@@ -1,5 +1,5 @@
 {
-  "_kommentar": "Byggnaderna i docs/produktionskedjor.md. Fas 1 har de som behövs för knäckebröd, plus stenröjaren för stenen. Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3.",
+  "_kommentar": "Byggnaderna i docs/produktionskedjor.md. Fas 1 har de som behövs för knäckebröd, plus stenröjaren, kafferepet, bygdegården, lanthandeln och rosteriet. Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (beslut 2026-10-08, väntar på Arons svar).",
   "buildings": [
     {
       "id": "stugan",
@@ -16,7 +16,19 @@
         "sten": 6,
         "ved": 4,
         "knackebrod": 6,
-        "kaffe": 2
+        "kaffe": 2,
+        "verktyg": 2
+      },
+      "beds": 4,
+      "start_people": {
+        "barare": 3,
+        "hantlangare": 2,
+        "skogshuggare": 1,
+        "sagare": 1,
+        "vedhuggare": 1,
+        "stenrojare": 1,
+        "bonde": 1,
+        "vattenbarare": 1
       }
     },
     {
@@ -34,7 +46,19 @@
         "sten": 6,
         "ved": 4,
         "knackebrod": 6,
-        "kaffe": 2
+        "kaffe": 2,
+        "verktyg": 2
+      },
+      "beds": 6,
+      "start_people": {
+        "barare": 3,
+        "hantlangare": 2,
+        "skogshuggare": 1,
+        "sagare": 1,
+        "vedhuggare": 1,
+        "stenrojare": 1,
+        "bonde": 1,
+        "vattenbarare": 1
       }
     },
     {
@@ -49,7 +73,8 @@
         "brador": 6,
         "sten": 3
       },
-      "storage": 200
+      "storage": 200,
+      "beds": 10
     },
     {
       "id": "skogshuggarkojan",
@@ -271,6 +296,91 @@
           },
           "out": {
             "knackebrod": 3
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "kafferepet",
+      "name": "Kafferepet",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "table": 40,
+      "blocked": [
+        "kaffe"
+      ]
+    },
+    {
+      "id": "bygdegarden",
+      "name": "Bygdegården",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "school": {
+        "seconds": 30,
+        "queue": 6,
+        "pay": [
+          {
+            "kaffe": 1
+          },
+          {
+            "surrogatkaffe": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "lanthandeln",
+      "name": "Lanthandeln",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "handlare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "next_to": "road",
+      "trade": true,
+      "closed_sundays": true
+    },
+    {
+      "id": "rosteriet",
+      "name": "Rosteriet",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "torpet",
+      "worker": "rostare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "rag": 1,
+            "ved": 1
+          },
+          "out": {
+            "surrogatkaffe": 2
           },
           "seconds": 30
         }

@@ -1,0 +1,11 @@
+{
+  "_kommentar": "Lanthandelns priser, designdokumentet (Kaffeekonomin och lanthandeln). Varje rad i pay är ett sätt att betala för en av varan. Spelaren väljer vad som köps och med vad.",
+  "seconds": 20,
+  "offers": [
+    { "buy": "kaffe", "pay": [ { "agg": 3 }, { "smor": 1 }, { "ved": 2 }, { "korv": 1 } ] },
+    { "buy": "salt", "pay": [ { "agg": 2 } ] },
+    { "buy": "socker", "pay": [ { "agg": 2 } ], "faction": "storgarden" },
+    { "buy": "bensin", "pay": [ { "smor": 2 }, { "agg": 4 } ], "faction": "storgarden" },
+    { "buy": "verktyg", "pay": [ { "ved": 3 } ] }
+  ]
+}

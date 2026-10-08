@@ -1,0 +1,17 @@
+{
+  "_kommentar": "Yrkena, designdokumentet (Folk och yrken). Varje byggnads arbetare är ett yrke här. role: carrier bär, laborer bygger och trampar stigar, worker arbetar i sin byggnad. tool är det bygdegården förbrukar utöver kaffet.",
+  "professions": [
+    { "id": "barare", "name": "Bärare", "role": "carrier" },
+    { "id": "hantlangare", "name": "Hantlangare", "role": "laborer" },
+    { "id": "skogshuggare", "name": "Skogshuggare", "role": "worker", "tool": "verktyg" },
+    { "id": "sagare", "name": "Sågare", "role": "worker", "tool": "verktyg" },
+    { "id": "vedhuggare", "name": "Vedhuggare", "role": "worker", "tool": "verktyg" },
+    { "id": "stenrojare", "name": "Stenröjare", "role": "worker", "tool": "verktyg" },
+    { "id": "vattenbarare", "name": "Vattenbärare", "role": "worker", "tool": "verktyg" },
+    { "id": "bonde", "name": "Bonde", "role": "worker", "tool": "verktyg" },
+    { "id": "mjolnare", "name": "Mjölnare", "role": "worker", "tool": "verktyg" },
+    { "id": "bagare", "name": "Bagare", "role": "worker", "tool": "verktyg" },
+    { "id": "handlare", "name": "Handlare", "role": "worker", "tool": "verktyg" },
+    { "id": "rostare", "name": "Rostare", "role": "worker", "tool": "verktyg" }
+  ]
+}

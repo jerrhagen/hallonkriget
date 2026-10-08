@@ -21,6 +21,15 @@ public enum CommandType : byte
 
     /// <summary>Planera en stig på en ruta. A och B: rutan. En hantlangare trampar upp den.</summary>
     PlanPath = 5,
+
+    /// <summary>Ställ ett yrke i bygdegårdens kö. A: bygdegårdens id, B: yrkets nummer i professions.json.</summary>
+    Train = 6,
+
+    /// <summary>Ta bort det sista i bygdegårdens kö som inte har börjat. A: bygdegårdens id.</summary>
+    CancelTraining = 7,
+
+    /// <summary>Spärra en vara i en byggnad, eller häv spärren. A: byggnadens id, B: varan, C: 1 spärrad, 0 öppen.</summary>
+    BlockGood = 8,
 }
 
 /// <summary>Ett kommando: vem, när, vad och upp till tre heltalsparametrar.</summary>

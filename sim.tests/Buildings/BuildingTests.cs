@@ -70,12 +70,14 @@ public class BuildingTests
     {
         var s = NewMatch(start: new TilePoint(5, 5));
         var stugan = s.Buildings[0];
-        Assert.Equal(30 - 28, stugan.InputSpace(G("ved")));
+        // Startförrådet är 30 varor: 10 brädor, 6 sten, 4 ved, 6 knäckebröd, 2 kaffe och 2 verktyg.
+        Assert.Equal(0, stugan.InputSpace(G("ved")));
+        Assert.False(stugan.PutInput(G("timmer")));
+        Assert.True(stugan.TakeOutput(G("kaffe")));
+        Assert.True(stugan.TakeOutput(G("kaffe")));
         Assert.True(stugan.PutInput(G("timmer")));
         Assert.True(stugan.PutInput(G("timmer")));
         Assert.False(stugan.PutInput(G("timmer")));
-        Assert.True(stugan.TakeOutput(G("kaffe")));
-        Assert.True(stugan.PutInput(G("timmer")));
     }
 
     [Fact]

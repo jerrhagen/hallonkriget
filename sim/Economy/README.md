@@ -9,4 +9,8 @@ Leveranssystemet (`GameState.Deliveries.cs`), som i designdokumentet: begäran, 
 
 En `Delivery` reserverar varan i avsändaren (`Outgoing`) och platsen hos mottagaren (`Incoming`). Tar mottagaren inte emot varan när bäraren kommer fram, bärs den till närmaste förråd.
 
-Inte här än: prioritet per byggnad, spärrar per vara i boden, vägar som cachas mellan byggnader.
+Kafferepet och bygdegården tar emot varor som en vanlig byggnad. Bordet rymmer 40 portioner av all mat tillsammans. Lanthandeln är en byggnad vars recept är byten från `trade.json`; den gör ingenting förrän spelaren valt ett, och är stängd på söndagar (`GameClock`).
+
+En byggnad kan spärra en vara (`BlockGood`), så att den inte begärs. Kaffet är spärrat på kafferepet från början.
+
+Inte här än: prioritet per byggnad, spärrar i boden (att inte lämna ut), vägar som cachas mellan byggnader.

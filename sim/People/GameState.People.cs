@@ -41,7 +41,7 @@ public sealed partial class GameState
 
     internal Person SpawnPerson(byte owner, PersonRole role, TilePoint tile, string profession = "")
     {
-        var person = new Person(_nextPersonId++, owner, role, profession, tile, WalkSpeed);
+        var person = new Person(_nextPersonId++, owner, role, profession, tile, WalkSpeed, Data.Mood.Max, Data.Mood.TicksPerPoint);
         _people.Add(person);
         PeopleOnTile[Map.Index(tile)]++;
         return person;
@@ -65,7 +65,11 @@ public sealed partial class GameState
     {
         foreach (var p in _people)
         {
-            if (p.Inside) continue;
+            if (p.Inside)
+            {
+                if (p.Job == PersonJob.AtWork) LeaveWorkToEat(p);
+                continue;
+            }
             if (p.IsMoving)
             {
                 Step(p);
@@ -139,6 +143,8 @@ public sealed partial class GameState
     /// <summary>Personen står still: antingen framme, mitt i ett arbete eller ledig.</summary>
     private void Act(Person p)
     {
+        if (Hungry(p) && p.Job is PersonJob.Idle or PersonJob.Building or PersonJob.Treading && TryGoEat(p)) return;
+
         switch (p.Job)
         {
             case PersonJob.Idle:
@@ -178,7 +184,7 @@ public sealed partial class GameState
             case PersonJob.ToWorkplace:
             {
                 var work = _buildings[p.Target];
-                if (work.HasWorker)
+                if (work.WorkerId != p.Id || p.Tile != work.Entrance)
                 {
                     MakeIdle(p);
                     break;
@@ -196,6 +202,14 @@ public sealed partial class GameState
 
             case PersonJob.ToDropoff:
                 ArriveAtDropoff(p);
+                break;
+
+            case PersonJob.ToEat:
+                ArriveAtTable(p);
+                break;
+
+            case PersonJob.ToHome:
+                LieDown(p);
                 break;
         }
     }
@@ -260,15 +274,22 @@ public sealed partial class GameState
         }
     }
 
-    /// <summary>Arbetaren går till närmaste byggnad av eget slag som saknar arbetare.</summary>
+    /// <summary>
+    /// Arbetaren går tillbaka till sin arbetsplats, eller till närmaste byggnad av eget slag som
+    /// saknar arbetare. Platsen är hens också när hen är ute och äter.
+    /// </summary>
     private void FindWorkplace(Person p)
     {
         Building? bestWork = null;
         int best = int.MaxValue;
         foreach (var b in _buildings)
         {
-            if (b.Owner != p.Owner || b.Stage != BuildingStage.Done || b.HasWorker || b.Def.Worker != p.Profession) continue;
-            if (CountWithTarget(PersonJob.ToWorkplace, PersonJob.ToWorkplace, b.Id) > 0) continue;
+            if (b.WorkerId == p.Id)
+            {
+                bestWork = b;
+                break;
+            }
+            if (b.Owner != p.Owner || b.Stage != BuildingStage.Done || b.WorkerId >= 0 || b.Def.Worker != p.Profession) continue;
             int d = Distance(p.Tile, b.Entrance);
             if (d < best)
             {
@@ -278,6 +299,7 @@ public sealed partial class GameState
         }
         if (bestWork is not null && WalkTo(p, bestWork.Entrance))
         {
+            bestWork.WorkerId = p.Id;
             p.Job = PersonJob.ToWorkplace;
             p.Target = bestWork.Id;
         }

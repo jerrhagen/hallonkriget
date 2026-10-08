@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Hallonkriget.Sim.Data;
 using Hallonkriget.Sim.Determinism;
 using Hallonkriget.Sim.Map;
@@ -41,6 +42,9 @@ public sealed class Building
     /// <summary>Om byggnadens arbetare är på plats. Sätts av personerna (sim/People).</summary>
     public bool HasWorker { get; set; }
 
+    /// <summary>Personen som har den här arbetsplatsen, även när hen är ute och äter. -1 när ingen.</summary>
+    public int WorkerId { get; set; } = -1;
+
     /// <summary>Receptet spelaren valt, eller -1: turas om mellan de recept som går att göra.</summary>
     public int SelectedRecipe { get; private set; } = -1;
 
@@ -55,6 +59,14 @@ public sealed class Building
     /// <summary>Varor som en bärare är på väg att hämta härifrån, per vara.</summary>
     internal readonly int[] Outgoing;
 
+    /// <summary>Bygdegårdens kö: yrken som ska utbildas, det första pågår eller väntar på betalning.</summary>
+    public IReadOnlyList<ProfessionDef> TrainingQueue => _queue;
+
+    /// <summary>Yrket som utbildas just nu, eller -1.</summary>
+    public int Training { get; private set; } = -1;
+
+    private readonly List<ProfessionDef> _queue = new();
+    private readonly bool[] _blocked;    // per vara: spelaren har spärrat den
     private readonly int[] _delivered;   // material per rad i Def.Cost
     private readonly int[] _input;       // per vara
     private readonly int[] _output;      // per vara; för förråd är det hela lagret
@@ -72,6 +84,8 @@ public sealed class Building
         _output = new int[goodCount];
         Incoming = new int[goodCount];
         Outgoing = new int[goodCount];
+        _blocked = new bool[goodCount];
+        foreach (int g in def.Blocked) _blocked[g] = true;
     }
 
     public static TilePoint EntranceFor(BuildingDef def, TilePoint origin) =>
@@ -152,7 +166,44 @@ public sealed class Building
         if (Stage != BuildingStage.Done) return 0;
         if (Def.IsStorage) return Def.Storage - StoredTotal;
         if (!Uses(good)) return 0;
+        if (Def.Table > 0) return Def.Table - InputTotal;
+        if (Def.School is { } school) return SchoolSpace(school, good);
         return StockLimit - _input[good];
+    }
+
+    /// <summary>Hur många till som kan begäras, med det som redan är på väg. Bordet delas av all mat.</summary>
+    internal int RequestSpace(int good)
+    {
+        if (Def.Table == 0) return InputSpace(good) - Incoming[good];
+        int incoming = 0;
+        foreach (int c in Incoming) incoming += c;
+        return InputSpace(good) - incoming;
+    }
+
+    public int InputTotal
+    {
+        get
+        {
+            int sum = 0;
+            foreach (int c in _input) sum += c;
+            return sum;
+        }
+    }
+
+    /// <summary>Tar en vara ur inlagret, som när någon äter på kafferepet.</summary>
+    public bool TakeInput(int good)
+    {
+        if (_input[good] <= 0) return false;
+        _input[good]--;
+        return true;
+    }
+
+    public bool IsBlocked(int good) => _blocked[good];
+
+    /// <summary>Spärrar en vara så att byggnaden inte begär den, eller häver spärren.</summary>
+    public void SetBlocked(int good, bool blocked)
+    {
+        if (good >= 0 && good < _blocked.Length) _blocked[good] = blocked;
     }
 
     public int InputCount(int good) => _input[good];
@@ -175,9 +226,17 @@ public sealed class Building
         return true;
     }
 
-    /// <summary>Används varan i något recept som får köras?</summary>
+    /// <summary>
+    /// Vill byggnaden ha varan? Den ska ingå i ett recept som får köras, stå på kafferepets bord, eller
+    /// betala för utbildningen som står först i bygdegårdens kö. Spärrade varor begärs inte.
+    /// </summary>
     internal bool Uses(int good)
     {
+        if (_blocked[good]) return false;
+        if (Def.School is { } school) return SchoolUses(school, good);
+        foreach (int g in Def.Accepts)
+            if (g == good) return true;
+        if (Def.IsTrade && SelectedRecipe < 0) return false;
         for (int r = 0; r < Def.Recipes.Length; r++)
         {
             if (SelectedRecipe >= 0 && r != SelectedRecipe) continue;
@@ -195,10 +254,11 @@ public sealed class Building
         SelectedRecipe = recipe;
     }
 
-    /// <summary>Ett tick produktion. Returnerar receptet om en omgång blev klar.</summary>
-    internal Recipe? UpdateProduction(GameMap map)
+    /// <summary>Ett tick produktion. Returnerar receptet om en omgång blev klar. Closed: söndag för lanthandeln.</summary>
+    internal Recipe? UpdateProduction(GameMap map, bool closed = false)
     {
         if (Stage != BuildingStage.Done || Def.Recipes.Length == 0) return null;
+        if (Def.IsTrade && SelectedRecipe < 0 && CurrentRecipe < 0) return null;
 
         if (CurrentRecipe >= 0)
         {
@@ -210,6 +270,7 @@ public sealed class Building
         }
 
         if (Def.Worker is not null && !HasWorker) return null;
+        if (closed && Def.ClosedSundays) return null;
         if (Def.GathersFrom is { } terrain && !TerrainNearby(map, terrain, Def.GatherRadius)) return null;
 
         int n = Def.Recipes.Length;
@@ -240,6 +301,88 @@ public sealed class Building
         return true;
     }
 
+    // ---- Bygdegården ----
+
+    /// <summary>Ställer ett yrke i kön. Returnerar false om kön är full.</summary>
+    internal bool Enqueue(ProfessionDef profession)
+    {
+        if (Def.School is not { } school || Stage != BuildingStage.Done || _queue.Count >= school.QueueLimit) return false;
+        _queue.Add(profession);
+        return true;
+    }
+
+    /// <summary>Tar bort det sista i kön som inte har börjat.</summary>
+    internal void CancelLast()
+    {
+        int first = Training >= 0 ? 1 : 0;
+        if (_queue.Count > first) _queue.RemoveAt(_queue.Count - 1);
+    }
+
+    /// <summary>Kaffe eller surrogat och verktyget för den som står näst på tur, så länge någon väntar.</summary>
+    private bool SchoolUses(SchoolDef school, int good)
+    {
+        int waiting = Training >= 0 ? 1 : 0;
+        if (_queue.Count <= waiting) return false;
+        return _queue[waiting].Tool == good || IsSchoolPayment(school, good);
+    }
+
+    private static bool IsSchoolPayment(SchoolDef school, int good) => PaymentPerPerson(school, good) > 0;
+
+    private static int PaymentPerPerson(SchoolDef school, int good)
+    {
+        foreach (var pay in school.Pay)
+        foreach (var a in pay)
+            if (a.Good == good) return a.Count;
+        return 0;
+    }
+
+    /// <summary>
+    /// Bygdegården begär bara det kön behöver: kaffe (eller surrogat) för dem som väntar och ett
+    /// verktyg i taget, så att kaffet och verktygen inte samlas där i onödan.
+    /// </summary>
+    private int SchoolSpace(SchoolDef school, int good)
+    {
+        int waiting = _queue.Count - (Training >= 0 ? 1 : 0);
+        int perPerson = PaymentPerPerson(school, good);
+        int wanted = perPerson > 0 ? IntMath.Min(StockLimit, waiting * perPerson) : 1;
+        return IntMath.Max(0, wanted - _input[good]);
+    }
+
+    /// <summary>
+    /// Ett tick i bygdegården. Första i kön börjar när betalningen och verktyget finns och det finns
+    /// plats för en till (room). Returnerar yrket när en ny person är klar.
+    /// </summary>
+    internal ProfessionDef? UpdateSchool(bool room)
+    {
+        if (Def.School is not { } school || Stage != BuildingStage.Done) return null;
+
+        if (Training >= 0)
+        {
+            if (--CycleTicksLeft > 0) return null;
+            var done = _queue[0];
+            Training = -1;
+            _queue.RemoveAt(0);
+            return done;
+        }
+
+        if (_queue.Count == 0 || !room) return null;
+        var next = _queue[0];
+        if (next.Tool >= 0 && _input[next.Tool] < 1) return null;
+        foreach (var pay in school.Pay)
+        {
+            bool enough = true;
+            foreach (var a in pay)
+                if (_input[a.Good] < a.Count) enough = false;
+            if (!enough) continue;
+            foreach (var a in pay) _input[a.Good] -= a.Count;
+            if (next.Tool >= 0) _input[next.Tool]--;
+            Training = next.Index;
+            CycleTicksLeft = school.Ticks;
+            return null;
+        }
+        return null;
+    }
+
     /// <summary>Finns terrängen inom radien, räknat från dörren?</summary>
     private bool TerrainNearby(GameMap map, Terrain terrain, int radius)
     {
@@ -264,14 +407,19 @@ public sealed class Building
         h.Add((byte)Stage);
         h.Add(WorkDone);
         h.Add(HasWorker);
+        h.Add(WorkerId);
+        h.Add(Training);
+        h.Add(_queue.Count);
+        foreach (var q in _queue) h.Add(q.Index);
+        h.AddSparse(_blocked);
         h.Add(SelectedRecipe);
         h.Add(CurrentRecipe);
         h.Add(CycleTicksLeft);
         h.Add(_nextAutoRecipe);
         foreach (int d in _delivered) h.Add(d);
-        foreach (int c in _input) h.Add(c);
-        foreach (int c in _output) h.Add(c);
-        foreach (int c in Incoming) h.Add(c);
-        foreach (int c in Outgoing) h.Add(c);
+        h.AddSparse(_input);
+        h.AddSparse(_output);
+        h.AddSparse(Incoming);
+        h.AddSparse(Outgoing);
     }
 }

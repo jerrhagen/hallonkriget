@@ -63,9 +63,15 @@ public sealed partial class GameState
                 throw new ArgumentException($"Spelare {i} kan inte börja på {start}");
             var home = state.AddBuilding((byte)i, def, start);
             home.CompleteAtOnce(def.StartStock);
-            // Designdokumentet: tre bärare och två hantlangare från start.
-            for (int k = 0; k < 3; k++) state.SpawnPerson((byte)i, PersonRole.Carrier, home.Entrance);
-            for (int k = 0; k < 2; k++) state.SpawnPerson((byte)i, PersonRole.Laborer, home.Entrance);
+            if (def.StartPeople.Length == 0)
+            {
+                // Designdokumentet: tre bärare och två hantlangare från start.
+                for (int k = 0; k < 3; k++) state.SpawnPerson((byte)i, PersonRole.Carrier, home.Entrance);
+                for (int k = 0; k < 2; k++) state.SpawnPerson((byte)i, PersonRole.Laborer, home.Entrance);
+            }
+            foreach (var group in def.StartPeople)
+                for (int k = 0; k < group.Count; k++)
+                    state.SpawnProfession((byte)i, state.Data.Professions[group.Profession], home.Entrance);
         }
         return state;
     }
@@ -132,11 +138,35 @@ public sealed partial class GameState
                     PlanPath(c.Player, new TilePoint(c.A, c.B));
                     break;
                 case CommandType.SelectRecipe:
-                    if (c.A >= 0 && c.A < _buildings.Count && _buildings[c.A].Owner == c.Player)
-                        _buildings[c.A].SelectRecipe(c.B);
+                    SelectRecipe(c.Player, c.A, c.B);
+                    break;
+                case CommandType.Train:
+                    Train(c.Player, c.A, c.B);
+                    break;
+                case CommandType.CancelTraining:
+                    if (OwnBuilding(c.Player, c.A) is { } school) school.CancelLast();
+                    break;
+                case CommandType.BlockGood:
+                    if (OwnBuilding(c.Player, c.A) is { } blocked) blocked.SetBlocked(c.B, c.C != 0);
                     break;
             }
         }
+    }
+
+    private Building? OwnBuilding(byte player, int id) =>
+        id >= 0 && id < _buildings.Count && _buildings[id].Owner == player ? _buildings[id] : null;
+
+    /// <summary>Välj recept, eller byte i lanthandeln. Byten som bara finns för det andra lägret går inte att välja.</summary>
+    private void SelectRecipe(byte player, int building, int recipe)
+    {
+        if (OwnBuilding(player, building) is not { } b) return;
+        if (recipe >= 0 && recipe < b.Def.Recipes.Length)
+        {
+            var rule = b.Def.Recipes[recipe].Faction;
+            if (rule == FactionRule.Torpet && _players[player].Faction != Faction.Torpet) return;
+            if (rule == FactionRule.Storgarden && _players[player].Faction != Faction.Storgarden) return;
+        }
+        b.SelectRecipe(recipe);
     }
 
     /// <summary>Stabil sortering på spelare. Egen insättningssortering: List.Sort är inte stabil.</summary>
@@ -187,7 +217,20 @@ public sealed partial class GameState
 
         var door = Building.EntranceFor(def, origin);
         if (!Map.Inside(door) || !Map.IsWalkable(door, MoveClass.Foot)) return false;
+        if (def.NextTo is { } terrain && !TerrainAround(def, origin, terrain)) return false;
         return true;
+    }
+
+    /// <summary>Ligger terrängen på någon ruta runt fotavtrycket, diagonalt också?</summary>
+    private bool TerrainAround(BuildingDef def, TilePoint origin, Terrain terrain)
+    {
+        for (int y = origin.Y - 1; y <= origin.Y + def.Height; y++)
+        for (int x = origin.X - 1; x <= origin.X + def.Width; x++)
+        {
+            var p = new TilePoint(x, y);
+            if (Map.Inside(p) && Map.TerrainAt(p) == terrain) return true;
+        }
+        return false;
     }
 
     private void TryPlaceBuilding(byte player, BuildingDef def, TilePoint origin)
@@ -276,14 +319,15 @@ public sealed partial class GameState
     // Stegen nedan fylls i under fas 1 och 3. Ordningen är fast och står i CLAUDE.md.
     private void UpdateProduction()
     {
+        bool sunday = GameClock.IsSunday(TickCount);
+        UpdateSchools();
         foreach (var b in _buildings)
         {
-            var done = b.UpdateProduction(Map);
+            var done = b.UpdateProduction(Map, closed: sunday);
             if (done is null) continue;
             foreach (var a in done.Out) _players[b.Owner].Produced[a.Good] += a.Count;
         }
     }
-    private void UpdateMood() { }
     private void ResolveCombat() { }
     private void RunComputerPlayers() { }
 }
