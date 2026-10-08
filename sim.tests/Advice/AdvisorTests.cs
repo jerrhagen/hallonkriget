@@ -131,8 +131,8 @@ public class AdvisorTests
         var farm = new Farm(start: new TilePoint(5, 5));
         var talking = new Advisor(Lines(), 0);
         var quiet = new Advisor(Lines(), 0) { Chatter = false };
-        // Stugan är full från början (30 av 30), vilket annars är värt en varning.
-        farm.Home.TakeOutput(farm.G("brador"));
+        // Stugan är full från början (39 av 30), vilket annars är värt en varning.
+        for (int i = 0; i < 10; i++) farm.Home.TakeOutput(farm.G("brador"));
         var talked = new List<Remark>();
         var silent = new List<Remark>();
         for (int i = 0; i < 2 * Advisor.BubbleInterval + 20; i++)

@@ -28,6 +28,8 @@ public class DeliveryTests
         var vedboden = farm.Place("vedboden", 12, 6);
         farm.RunUntil(() => vedboden.Stage == BuildingStage.Done, 3000, "vedboden byggd");
 
+        // Startförrådet ligger över stugans 30 platser; ta bort det som är över så att veden får plats.
+        while (farm.Home.OutputCount(farm.G("brador")) > 4) farm.Home.TakeOutput(farm.G("brador"));
         farm.Home.PutInput(farm.G("timmer"));
         farm.Home.PutInput(farm.G("timmer"));
         farm.State.SpawnPerson(0, PersonRole.Worker, farm.Home.Entrance, "vedhuggare");

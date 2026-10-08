@@ -67,17 +67,16 @@ public class BuildingTests
     }
 
     [Fact]
-    public void StorageHoldsFortyGoodsInTotal()
+    public void StorageHoldsThirtyGoodsInTotal()
     {
         var s = NewMatch(start: new TilePoint(5, 5));
         var stugan = s.Buildings[0];
-        // Stugan rymmer 40 och startförrådet är 39 varor: 16 brädor, 9 sten, 4 ved, 6 knäckebröd, 2 kaffe och 2 verktyg.
-        Assert.True(stugan.PutInput(G("timmer")));
-        Assert.Equal(0, stugan.InputSpace(G("ved")));
+        // Stugan rymmer 30, men startförrådet är 39 varor: 16 brädor, 9 sten, 4 ved, 6 knäckebröd, 2 kaffe
+        // och 2 verktyg. Inget tas emot förrän nio av dem är använda.
+        Assert.False(stugan.PutInput(G("timmer")));
+        for (int i = 0; i < 9; i++) Assert.True(stugan.TakeOutput(G("brador")));
         Assert.False(stugan.PutInput(G("timmer")));
         Assert.True(stugan.TakeOutput(G("kaffe")));
-        Assert.True(stugan.TakeOutput(G("kaffe")));
-        Assert.True(stugan.PutInput(G("timmer")));
         Assert.True(stugan.PutInput(G("timmer")));
         Assert.False(stugan.PutInput(G("timmer")));
     }

@@ -28,7 +28,7 @@ public sealed class Replay
     /// Reglernas version. Höjs med flit när en ändring i simuleringen gör att gamla repriser spelas
     /// upp annorlunda. Reprisregressionen kräver att sparade repriser med samma version stämmer.
     /// </summary>
-    public const int RulesVersion = 6;
+    public const int RulesVersion = 7;
 
     /// <summary>Så här ofta sparas en kontrollsumma, i tick.</summary>
     public const int ChecksumInterval = 100;

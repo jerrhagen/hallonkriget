@@ -7,7 +7,8 @@ Beslut som tagits efter designdokumentet. Nyast överst.
 - **Aron valde snabbare ekonomi (8 oktober)** efter att tusen matcher dator mot dator med specens tider tog runt två timmar och tre av fyra blev oavgjorda. Ändrat mot designdokumentet och Produktionskedjor:
   - Humöret sjunker en enhet var 9:e sekund i stället för var 6:e. Maten räcker alltså en och en halv gång så länge; det var den enskilt största bromsen, eftersom soldaterna svalt innan armén blev stor nog.
   - Kortare tider: åkern 25 s (40), kvarnen 12 s (20), bagarstugan 18 s (30), fiskeboden 20 s (35), brunnen 10 s (15), rosteriet 18 s (30), skogshuggarkojan 20 s (30), lanthandelns byten 12 s (20). Veden och timret är med eftersom kaffet köps för ved.
-- **Startförrådet (Aron gick på rekommendationen 8 oktober):** 16 brädor och 9 sten i stället för 10 och 6, precis ett kafferep till, så att kafferepet kan byggas direkt efter sågboden. Stugan och mangårdsbyggnaden rymmer 40 varor i stället för 30, annars får startförrådet inte plats.
+- **Startförrådet (Aron gick på rekommendationen 8 oktober):** 16 brädor och 9 sten i stället för 10 och 6, precis ett kafferep till, så att kafferepet kan byggas direkt efter sågboden. Stugan och mangårdsbyggnaden rymmer fortfarande 30, så startförrådet ligger nio över och inget tas emot förrän det har gått åt. (Ett förråd på 40 provades, men gav Storgården 79 % av vinsterna på tusen matcher.)
+- Tusen matcher dator mot dator på normal efter ändringen: Torpet 42 %, Storgården 57 %, 3 oavgjorda. En match tar i snitt 77 minuter (56–108), och hälften slutar inom 45–75.
 - Datorn bygger kafferepet direkt efter sågboden, och ullen, snickarboden och logen tidigare i byggordningen. Tiden mellan två byggen varierar en fjärdedel hit eller dit med spelets slump, så att två datorer inte spelar samma match varje gång; utan det blev tusen matcher i praktiken två.
 
 ## 2026-10-08: Datorspelaren och kartan grannarna (fas 3)
