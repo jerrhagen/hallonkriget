@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+*.user
+TestResults/
+
+# Godot
+.godot/
+.mono/
+game/export/
+*.translation
+
+# Renderad grafik byggs av art/render.py
+art/out/
+
+# Editorer och OS
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+__pycache__/
