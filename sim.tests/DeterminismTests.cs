@@ -37,7 +37,8 @@ public class DeterminismTests
         Assert.Equal(GoldenHash, state.Hash());
     }
 
-    private const ulong GoldenHash = 5550169582589594227UL;
+    // Ändrad när kartan kom in i Hash() (fas 1, kartan och sökvägar).
+    private const ulong GoldenHash = 16130387360001207923UL;
 
     [Fact]
     public void ReplayThroughByteFormatGivesSameHash()
