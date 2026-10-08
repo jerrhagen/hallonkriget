@@ -49,6 +49,12 @@ public sealed class Building
 
     public int CycleTicksLeft { get; private set; }
 
+    /// <summary>Varor på väg hit med bärare, per vara. Räknas av när de kommer fram.</summary>
+    internal readonly int[] Incoming;
+
+    /// <summary>Varor som en bärare är på väg att hämta härifrån, per vara.</summary>
+    internal readonly int[] Outgoing;
+
     private readonly int[] _delivered;   // material per rad i Def.Cost
     private readonly int[] _input;       // per vara
     private readonly int[] _output;      // per vara; för förråd är det hela lagret
@@ -64,6 +70,8 @@ public sealed class Building
         _delivered = new int[def.Cost.Length];
         _input = new int[goodCount];
         _output = new int[goodCount];
+        Incoming = new int[goodCount];
+        Outgoing = new int[goodCount];
     }
 
     public static TilePoint EntranceFor(BuildingDef def, TilePoint origin) =>
@@ -168,7 +176,7 @@ public sealed class Building
     }
 
     /// <summary>Används varan i något recept som får köras?</summary>
-    private bool Uses(int good)
+    internal bool Uses(int good)
     {
         for (int r = 0; r < Def.Recipes.Length; r++)
         {
@@ -187,20 +195,22 @@ public sealed class Building
         SelectedRecipe = recipe;
     }
 
-    internal void UpdateProduction(GameMap map)
+    /// <summary>Ett tick produktion. Returnerar receptet om en omgång blev klar.</summary>
+    internal Recipe? UpdateProduction(GameMap map)
     {
-        if (Stage != BuildingStage.Done || Def.Recipes.Length == 0) return;
+        if (Stage != BuildingStage.Done || Def.Recipes.Length == 0) return null;
 
         if (CurrentRecipe >= 0)
         {
-            if (--CycleTicksLeft > 0) return;
-            foreach (var a in Def.Recipes[CurrentRecipe].Out) _output[a.Good] += a.Count;
+            if (--CycleTicksLeft > 0) return null;
+            var finished = Def.Recipes[CurrentRecipe];
+            foreach (var a in finished.Out) _output[a.Good] += a.Count;
             CurrentRecipe = -1;
-            return;
+            return finished;
         }
 
-        if (Def.Worker is not null && !HasWorker) return;
-        if (Def.GathersFrom is { } terrain && !TerrainNearby(map, terrain, Def.GatherRadius)) return;
+        if (Def.Worker is not null && !HasWorker) return null;
+        if (Def.GathersFrom is { } terrain && !TerrainNearby(map, terrain, Def.GatherRadius)) return null;
 
         int n = Def.Recipes.Length;
         for (int k = 0; k < n; k++)
@@ -212,10 +222,11 @@ public sealed class Building
                 CurrentRecipe = r;
                 CycleTicksLeft = Def.Recipes[r].Ticks;
                 _nextAutoRecipe = (r + 1) % n;
-                return;
+                return null;
             }
-            if (SelectedRecipe >= 0) return;
+            if (SelectedRecipe >= 0) return null;
         }
+        return null;
     }
 
     private bool CanStart(Recipe recipe)
@@ -260,5 +271,7 @@ public sealed class Building
         foreach (int d in _delivered) h.Add(d);
         foreach (int c in _input) h.Add(c);
         foreach (int c in _output) h.Add(c);
+        foreach (int c in Incoming) h.Add(c);
+        foreach (int c in Outgoing) h.Add(c);
     }
 }

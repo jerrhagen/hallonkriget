@@ -1,7 +1,8 @@
 namespace Hallonkriget.Sim.Determinism;
 
 /// <summary>
-/// Kontrollsumma över tillståndet: FNV-1a 64 bitar, matat med heltal i fast byteordning.
+/// Kontrollsumma över tillståndet: FNV-1a 64 bitar, matat med ett 32-bitars heltal åt gången
+/// (inte en byte åt gången, för att Hash() ska hinna med hela kartan på under en millisekund).
 /// Varje del av GameState skriver sina fält hit i en fast ordning.
 /// </summary>
 public struct StateHasher
@@ -14,12 +15,7 @@ public struct StateHasher
 
     public ulong Value => _started ? _hash : OffsetBasis;
 
-    public void Add(byte value)
-    {
-        if (!_started) { _hash = OffsetBasis; _started = true; }
-        _hash ^= value;
-        _hash *= Prime;
-    }
+    public void Add(byte value) => Add((uint)value);
 
     public void Add(bool value) => Add(value ? (byte)1 : (byte)0);
 
@@ -27,10 +23,9 @@ public struct StateHasher
 
     public void Add(uint value)
     {
-        Add((byte)value);
-        Add((byte)(value >> 8));
-        Add((byte)(value >> 16));
-        Add((byte)(value >> 24));
+        if (!_started) { _hash = OffsetBasis; _started = true; }
+        _hash ^= value;
+        _hash *= Prime;
     }
 
     public void Add(long value) => Add(unchecked((ulong)value));

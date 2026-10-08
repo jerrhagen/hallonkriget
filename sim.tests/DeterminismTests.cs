@@ -35,11 +35,14 @@ public class DeterminismTests
 
         Assert.True(state.Walkers.Count > 50, "Manuset ska skapa vandrare, annars testar det ingenting");
         Assert.True(state.Buildings.Count > 30, "Manuset ska placera byggnader, annars testar det ingenting");
+        Assert.Contains(state.Buildings, b => b.Stage == Hallonkriget.Sim.Buildings.BuildingStage.Done && b.Def.Buildable);
+        Assert.True(state.Map.AllTiles().Count(p => state.Map.PathAt(p) == Hallonkriget.Sim.Map.PathState.Trodden) > 10,
+            "Hantlangarna ska ha trampat upp stigar");
         Assert.Equal(GoldenHash, state.Hash());
     }
 
-    // Ändrad när byggnaderna kom in i tillståndet och manuset (fas 1, byggnaderna).
-    private const ulong GoldenHash = 21820922164791246UL;
+    // Ändrad när personer och leveranser kom in i tillståndet och manuset (fas 1).
+    private const ulong GoldenHash = 11690953144229706082UL;
 
     [Fact]
     public void ReplayThroughByteFormatGivesSameHash()
