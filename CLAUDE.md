@@ -27,7 +27,8 @@ Speldatan läses av `sim/Data` till `GameData`. Varje mapp under `sim/` är en m
 
 ```
 dotnet test                         # alla tester, ska alltid vara gröna
-dotnet run --project sim.cli        # kör simuleringen utan grafik
+dotnet run --project sim.cli        # kör byggordningen brodgarden i 90 min och svarar på fas 1:s kontrollfråga
+dotnet run --project sim.cli -- brodgarden 120 1958 --byggnader   # byggordning, minuter, frö, byggnadernas läge
 python3 art/render.py               # SVG -> PNG (kräver: pip install resvg-py)
 ```
 

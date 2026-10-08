@@ -49,7 +49,10 @@ public sealed partial class GameState
         if (setup.MapWidth <= 0 || setup.MapHeight <= 0) throw new ArgumentException("Kartan måste ha en storlek");
         if (setup.Players.Count is 0 or > 8) throw new ArgumentException("1–8 spelare");
 
+        if (setup.Map is { } mapDef && (mapDef.Width != setup.MapWidth || mapDef.Height != setup.MapHeight))
+            throw new ArgumentException("Kartans storlek stämmer inte");
         var state = new GameState(setup.Seed, setup.MapWidth, setup.MapHeight, setup.Data ?? GameData.Empty);
+        setup.Map?.Apply(state.Map);
         for (int i = 0; i < setup.Players.Count; i++)
         {
             var p = setup.Players[i];

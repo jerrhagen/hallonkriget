@@ -121,6 +121,8 @@ public sealed partial class GameState
             return;
         }
         if (b.Def.IsStorage) return;
+        // En byggnad som ingen arbetare har tagit begär inget, så att varorna inte fastnar där.
+        if (b.Def.Worker is not null && b.WorkerId < 0) return;
         for (int good = 0; good < Data.Goods.Count; good++)
             if (b.Uses(good)) goods.Add(good);
     }

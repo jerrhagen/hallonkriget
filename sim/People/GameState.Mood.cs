@@ -119,11 +119,8 @@ public sealed partial class GameState
         p.Mood = 0;
         _players[p.Owner].GaveUp++;
         LeaveBuilding(p);
-        if (p.Job is PersonJob.ToPickup or PersonJob.ToDropoff && FindDelivery(p.Target) is { } d)
-        {
-            p.Carrying = -1;
-            CancelDelivery(d, p);
-        }
+        // Leveransen släpps, men varan följer med hem och läggs i stugan (beslut 2026-10-08).
+        if (p.Job is PersonJob.ToPickup or PersonJob.ToDropoff && FindDelivery(p.Target) is { } d) CancelDelivery(d, p);
         MakeIdle(p);
         StopWalking(p);
 
@@ -139,6 +136,11 @@ public sealed partial class GameState
 
     private void LieDown(Person p)
     {
+        if (p.Carrying >= 0)
+        {
+            if (p.Target >= 0 && p.Tile == _buildings[p.Target].Entrance) _buildings[p.Target].PutInput(p.Carrying);
+            p.Carrying = -1; // utan plats i stugan är varan borta
+        }
         p.Job = PersonJob.Resting;
         p.Timer = Data.Mood.RestTicks;
         if (p.Target >= 0 && p.Tile == _buildings[p.Target].Entrance && !p.Inside)

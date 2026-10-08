@@ -8,3 +8,5 @@ Rutnät, terräng, ägare per ruta, stigar och sökvägar. Se docs/designdokumen
 - `Pathfinder`: A* i åtta riktningar, inga diagonaler över stängda hörn. Byggnader stänger sin ruta men kan vara mål. Samma fråga ger alltid samma väg. Inte en del av tillståndet.
 
 Inte här än: att två bärare får mötas på en stigruta men inte tre (People), cachning av vägar mellan byggnader (Economy), kartor från `data/maps/`.
+
+`MapDef` läser en karta från data/maps: storlek, startplatser och terräng som rektanglar. `MatchSetup.OnMap` startar en match på den.
