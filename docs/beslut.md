@@ -2,9 +2,9 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
-## 2026-10-08: Snålare CI
+## 2026-10-08: Publikt repo och CI
 
-- Repot är privat och Actions-minuterna är få. Pull requests kör bara Linux (tester och spelbygge, en minut). Windows-jämförelsen av determinismen körs vid push till main och för hand. Ändringar som bara rör grafik eller dokument kör inga tester.
+- Repot är publikt sedan den 8 oktober, så Actions-minuterna kostar inget. Varje pull request kör Linux (tester och spelbygge) och Windows (determinismen jämförs mellan plattformarna). En ny push avbryter en körning som inte är klar, och ändringar som bara rör grafik eller dokument kör inga tester.
 
 ## 2026-10-08: Stilprovet
 
