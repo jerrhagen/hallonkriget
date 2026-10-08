@@ -104,6 +104,17 @@ public sealed partial class GameState
             return;
         }
 
+        // Drängen äter själv ur brickan, eller på kafferepet när den är tom.
+        if (Hungry(p))
+        {
+            if (p.TrayFood > 0)
+            {
+                Serve(p, p);
+                return;
+            }
+            if (TryGoEat(p)) return;
+        }
+
         Person? guest = null;
         if (p.TrayCoffee > 0) guest = NearestOwnSoldier(p, q => q.CoffeeDue, 40);
         if (guest is null && p.TrayFood > 0) guest = NearestOwnSoldier(p, q => Hungry(q) && q.Job == PersonJob.Soldiering && Data.Units[q.Unit].Recruits > 0, 20);
@@ -154,7 +165,7 @@ public sealed partial class GameState
 
     private void Serve(Person server, Person guest)
     {
-        if (guest.CoffeeDue && server.TrayCoffee > 0)
+        if (guest.CoffeeDue && server.TrayCoffee > 0 && guest != server)
         {
             server.TrayCoffee--;
             Drink(guest);

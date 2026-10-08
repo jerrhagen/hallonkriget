@@ -22,13 +22,13 @@ public sealed class Replay
     private static readonly byte[] Magic = Encoding.ASCII.GetBytes("HKREPRIS");
 
     /// <summary>Filformatets version. Höjs när filens uppbyggnad ändras.</summary>
-    public const int FormatVersion = 1;
+    public const int FormatVersion = 2;
 
     /// <summary>
     /// Reglernas version. Höjs med flit när en ändring i simuleringen gör att gamla repriser spelas
     /// upp annorlunda. Reprisregressionen kräver att sparade repriser med samma version stämmer.
     /// </summary>
-    public const int RulesVersion = 4;
+    public const int RulesVersion = 5;
 
     /// <summary>Så här ofta sparas en kontrollsumma, i tick.</summary>
     public const int ChecksumInterval = 100;
@@ -129,12 +129,21 @@ public sealed class Replay
             CommandCodec.WriteVarInt(stream, a.X1);
             CommandCodec.WriteVarInt(stream, a.Y1);
         }
+        CommandCodec.WriteVarInt(stream, Map.Territories.Length);
+        foreach (var a in Map.Territories)
+        {
+            CommandCodec.WriteVarInt(stream, a.X0);
+            CommandCodec.WriteVarInt(stream, a.Y0);
+            CommandCodec.WriteVarInt(stream, a.X1);
+            CommandCodec.WriteVarInt(stream, a.Y1);
+        }
 
         CommandCodec.WriteVarInt(stream, Players.Count);
         foreach (var p in Players)
         {
             stream.WriteByte((byte)p.Faction);
             stream.WriteByte(p.IsComputer ? (byte)1 : (byte)0);
+            stream.WriteByte((byte)p.Difficulty);
             stream.WriteByte(p.Start.HasValue ? (byte)1 : (byte)0);
             if (p.Start is { } start) WritePoint(stream, start);
         }
@@ -172,6 +181,10 @@ public sealed class Replay
             areas[i] = new TerrainArea(terrain, CommandCodec.ReadVarInt(stream), CommandCodec.ReadVarInt(stream),
                 CommandCodec.ReadVarInt(stream), CommandCodec.ReadVarInt(stream));
         }
+        var territories = new TerrainArea[CommandCodec.ReadVarInt(stream)];
+        for (int i = 0; i < territories.Length; i++)
+            territories[i] = new TerrainArea(Terrain.Clearing, CommandCodec.ReadVarInt(stream), CommandCodec.ReadVarInt(stream),
+                CommandCodec.ReadVarInt(stream), CommandCodec.ReadVarInt(stream));
 
         var players = new List<PlayerSetup>();
         int playerCount = CommandCodec.ReadVarInt(stream);
@@ -179,11 +192,12 @@ public sealed class Replay
         {
             var faction = (Faction)CommandCodec.ReadByte(stream);
             bool computer = CommandCodec.ReadByte(stream) != 0;
+            var difficulty = (Difficulty)CommandCodec.ReadByte(stream);
             TilePoint? start = CommandCodec.ReadByte(stream) != 0 ? ReadPoint(stream) : null;
-            players.Add(new PlayerSetup(faction, computer, start));
+            players.Add(new PlayerSetup(faction, computer, start, difficulty));
         }
 
-        var replay = new Replay(seed, new MapDef(mapId, w, h, starts, areas), players, fingerprint, rules);
+        var replay = new Replay(seed, new MapDef(mapId, w, h, starts, areas) { Territories = territories }, players, fingerprint, rules);
         int count = CommandCodec.ReadVarInt(stream);
         for (int i = 0; i < count; i++) replay._commands.Add(CommandCodec.Read(stream));
         int checks = CommandCodec.ReadVarInt(stream);

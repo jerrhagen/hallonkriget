@@ -56,8 +56,10 @@ public sealed partial class GameState
         for (int i = 0; i < setup.Players.Count; i++)
         {
             var p = setup.Players[i];
-            state._players.Add(new Player((byte)i, p.Faction, p.IsComputer, state.Data.Goods.Count, state.Data.Units.Count));
+            state._computers.Add(p.IsComputer ? new ComputerState() : null);
+            state._players.Add(new Player((byte)i, p.Faction, p.IsComputer, state.Data.Goods.Count, state.Data.Units.Count, p.Difficulty));
         }
+        setup.Map?.ApplyTerritories(state.Map, setup.Players.Count);
         for (int i = 0; i < setup.Players.Count; i++)
         {
             if (setup.Players[i].Start is not { } start) continue;
@@ -113,6 +115,7 @@ public sealed partial class GameState
         AddDeliveriesToHash(ref h);
         AddMilitaryToHash(ref h);
         AddDefenceToHash(ref h);
+        AddComputersToHash(ref h);
         h.Add(_nextWalkerId);
         h.Add(_walkers.Count);
         foreach (var w in _walkers) w.AddToHash(ref h);
@@ -456,5 +459,4 @@ public sealed partial class GameState
         return best;
     }
 
-    private void RunComputerPlayers() { }
 }
