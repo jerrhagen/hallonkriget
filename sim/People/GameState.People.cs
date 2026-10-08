@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Hallonkriget.Sim.Buildings;
+using Hallonkriget.Sim.Data;
 using Hallonkriget.Sim.Determinism;
 using Hallonkriget.Sim.Map;
 using Hallonkriget.Sim.People;
@@ -84,7 +85,7 @@ public sealed partial class GameState
     {
         if (p.StepProgress < p.StepTotal)
         {
-            p.StepProgress += p.Speed;
+            p.StepProgress += EffectiveSpeed(p);
             return;
         }
 
@@ -114,8 +115,12 @@ public sealed partial class GameState
         // Det som blev över från förra steget följer med, så att farten blir rätt över långa sträckor.
         int carry = p.StepProgress - p.StepTotal;
         p.StepTotal = (diagonal ? Pathfinder.Diagonal : Pathfinder.Straight) * Map.StepCost(next, MoveClass.Foot) * 10;
-        p.StepProgress = carry + p.Speed;
+        p.StepProgress = carry + EffectiveSpeed(p);
     }
+
+    /// <summary>Farten just nu: pannkakor ger 10 procent mer i tre minuter.</summary>
+    public int EffectiveSpeed(Person p) =>
+        p.SpeedBonusTicks > 0 ? p.Speed * (100 + Data.BonusPercent(FoodBonus.Speed)) / 100 : p.Speed;
 
     /// <summary>Räknar ut vägen dit. Står personen redan där är den framme direkt.</summary>
     private bool WalkTo(Person p, TilePoint destination)

@@ -13,6 +13,7 @@ public enum Terrain : byte
     RaspberryThicket,  // hallonsnår
     PlumTree,          // plommonträd
     Road,              // landsväg
+    Field,             // odlad åker: hör till en åker, går att gå över men inte att bygga på
 }
 
 /// <summary>Hur något tar sig fram. Fläskkavalleri och traktor kan inte gå i myr.</summary>

@@ -16,6 +16,7 @@ public sealed class GameMap
     private readonly PathState[] _path;
     private readonly byte[] _owner;
     private readonly int[] _occupant;
+    private readonly byte[] _taken;
 
     public int Width { get; }
     public int Height { get; }
@@ -36,6 +37,7 @@ public sealed class GameMap
         _path = new PathState[width * height];
         _owner = new byte[width * height];
         _occupant = new int[width * height];
+        _taken = new byte[width * height];
         Array.Fill(_owner, NoOwner);
     }
 
@@ -59,11 +61,17 @@ public sealed class GameMap
     /// <summary>Vad som står på rutan: 0 är inget, annars byggnadens id + 1.</summary>
     public int OccupantAt(TilePoint p) => _occupant[Index(p)];
 
+    /// <summary>Hur mycket som redan tagits från rutan: sten, träd eller skrot. Noll när terrängen ändras.</summary>
+    public int TakenAt(TilePoint p) => _taken[Index(p)];
+
+    public void SetTaken(TilePoint p, int taken) => _taken[Index(p)] = (byte)IntMath.Clamp(taken, 0, 255);
+
     public void SetTerrain(TilePoint p, Terrain terrain)
     {
         int i = Index(p);
         if (_terrain[i] == terrain) return;
         _terrain[i] = terrain;
+        _taken[i] = 0;
         if (!TerrainRules.IsBuildable(terrain)) _path[i] = PathState.None;
         Version++;
     }
@@ -112,6 +120,7 @@ public sealed class GameMap
         {
             h.Add((uint)_terrain[i] | (uint)_path[i] << 8 | (uint)_owner[i] << 16);
             h.Add(_occupant[i]);
+            h.Add(_taken[i]);
         }
     }
 }

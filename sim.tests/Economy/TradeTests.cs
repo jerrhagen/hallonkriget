@@ -91,9 +91,9 @@ public class TradeTests
         shop.HasWorker = true;
         shop.SelectRecipe(Recipe(farm, shop, "verktyg", "ved"));
         farm.Put(shop, "ved", 3);
-        Assert.Null(shop.UpdateProduction(farm.State.Map, closed: true));
+        Assert.Null(shop.UpdateProduction(0, (_, _) => true, closed: true));
         Assert.Equal(-1, shop.CurrentRecipe);
-        shop.UpdateProduction(farm.State.Map, closed: false);
+        shop.UpdateProduction(0, (_, _) => true, closed: false);
         Assert.NotEqual(-1, shop.CurrentRecipe);
     }
 

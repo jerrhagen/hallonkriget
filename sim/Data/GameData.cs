@@ -17,10 +17,26 @@ public readonly record struct GoodAmount(int Good, int Count);
 /// Ett recept: det som går in, det som kommer ut och hur många tick det tar. Lanthandelns byten är
 /// också recept, och en del av dem finns bara för ett läger.
 /// </summary>
-public sealed record Recipe(GoodAmount[] In, GoodAmount[] Out, int Ticks, FactionRule Faction = FactionRule.Both);
+public sealed record Recipe(GoodAmount[] In, GoodAmount[] Out, int Ticks, FactionRule Faction = FactionRule.Both, GatherDef? Gather = null);
+
+/// <summary>
+/// Det en samlare tar från kartan: terrängen, hur långt bort från dörren och, för det som tar slut,
+/// hur mycket en ruta ger innan den blir glänta (PerTile, noll för det som aldrig tar slut).
+/// PlantEvery: en ny gran per så många fällda.
+/// </summary>
+public sealed record GatherDef(Terrain Terrain, int Radius, int PerTile = 0, int PlantEvery = 0);
+
+/// <summary>Vad mat på kafferepet kan ge utöver humöret.</summary>
+public enum FoodBonus : byte
+{
+    None,
+    Speed,   // "fart": går fortare
+    Work,    // "arbete": arbetar fortare
+    Attack,  // "anfall": soldater slår hårdare (fas 3)
+}
 
 /// <summary>Mat på kafferepet: hur mycket humör den ger. With: maten räknas bara ihop med den varan (sylt med pannkakor).</summary>
-public sealed record FoodDef(int Good, int Mood, int With, string Bonus, int BonusPercent, int BonusTicks);
+public sealed record FoodDef(int Good, int Mood, int With, FoodBonus Bonus, int BonusPercent, int BonusTicks);
 
 /// <summary>Humörets regler från food.json, i tick.</summary>
 public sealed record MoodRules(int Max, int TicksPerPoint, int EatAt, int RestTicks)
@@ -63,8 +79,20 @@ public sealed class BuildingDef
     public int BuildTicks { get; init; }
     public int Storage { get; init; }
     public GoodAmount[] StartStock { get; init; } = Array.Empty<GoodAmount>();
-    public Terrain? GathersFrom { get; init; }
-    public int GatherRadius { get; init; }
+    /// <summary>Det byggnaden samlar från kartan, för alla recept som inte har ett eget.</summary>
+    public GatherDef? Gather { get; init; }
+    public Terrain? GathersFrom => Gather?.Terrain;
+    public int GatherRadius => Gather?.Radius ?? 0;
+
+    /// <summary>Receptet som är valt från början, eller -1: turas om.</summary>
+    public int DefaultRecipe { get; init; } = -1;
+
+    /// <summary>Odlingsrutor till höger om byggnaden (åkern), i rutor. Noll när inga.</summary>
+    public int FieldWidth { get; init; }
+    public int FieldHeight { get; init; }
+
+    /// <summary>Ett recept per speldag, på morgonen, och inget på söndagar (mjölkpallen).</summary>
+    public bool Daily { get; init; }
     public Recipe[] Recipes { get; init; } = Array.Empty<Recipe>();
 
     /// <summary>Sovplatser när byggnaden är färdig. Summan är befolkningstaket.</summary>
@@ -220,7 +248,7 @@ public sealed class GameData
                 if (value <= 0) throw new GameDataException($"food.json: {id} måste ge humör");
                 foods.Add(new FoodDef(good, value,
                     f.TryGetProperty("with", out var w) ? Good(w.GetString()!, "food.json") : -1,
-                    f.TryGetProperty("bonus", out var bo) ? bo.GetString()! : "",
+                    f.TryGetProperty("bonus", out var bo) ? ParseBonus(bo.GetString()!) : FoodBonus.None,
                     f.TryGetProperty("percent", out var pc) ? pc.GetInt32() : 0,
                     f.TryGetProperty("seconds", out var sc) ? sc.GetInt32() * GameState.TicksPerSecond : 0));
             }
@@ -291,13 +319,7 @@ public sealed class GameData
                 // Designdokumentet: en liten byggnad tar ungefär en minut när materialet finns.
                 int buildSeconds = b.TryGetProperty("build_seconds", out var bs) ? bs.GetInt32() : 30 + 30 * (w > h ? w : h);
 
-                Terrain? gathers = null;
-                int radius = 0;
-                if (b.TryGetProperty("gathers", out var gt))
-                {
-                    gathers = ParseTerrain(RequireString(gt, "terrain", id), id);
-                    radius = gt.GetProperty("radius").GetInt32();
-                }
+                var gather = b.TryGetProperty("gathers", out var gt) ? ParseGather(gt, id) : null;
 
                 var recipes = new List<Recipe>();
                 if (b.TryGetProperty("recipes", out var rs))
@@ -308,7 +330,8 @@ public sealed class GameData
                         if (seconds <= 0) throw new GameDataException($"{id}: receptets tid måste vara positiv");
                         var output = Amounts(r, "out", id);
                         if (output.Length == 0) throw new GameDataException($"{id}: ett recept måste ge något");
-                        recipes.Add(new Recipe(Amounts(r, "in", id), output, seconds * GameState.TicksPerSecond));
+                        var recipeGather = r.TryGetProperty("gathers", out var rg) ? ParseGather(rg, id) : null;
+                        recipes.Add(new Recipe(Amounts(r, "in", id), output, seconds * GameState.TicksPerSecond, Gather: recipeGather));
                     }
                 }
 
@@ -344,6 +367,16 @@ public sealed class GameData
                         sc.GetProperty("queue").GetInt32(), pay.ToArray());
                 }
 
+                int defaultRecipe = b.TryGetProperty("default_recipe", out var dr) ? dr.GetInt32() : -1;
+                if (defaultRecipe < -1 || defaultRecipe >= recipes.Count) throw new GameDataException($"{id}: default_recipe finns inte");
+                int fieldW = 0, fieldH = 0;
+                if (b.TryGetProperty("field", out var fd))
+                {
+                    fieldW = fd[0].GetInt32();
+                    fieldH = fd[1].GetInt32();
+                    if (fieldW is < 1 or > 3 || fieldH < 1 || fieldH > h) throw new GameDataException($"{id}: odlingsrutorna ska vara 1–3 breda och högst lika höga som byggnaden");
+                }
+
                 var blocked = new List<int>();
                 if (b.TryGetProperty("blocked", out var bl))
                     foreach (var g in bl.EnumerateArray()) blocked.Add(Good(g.GetString()!, id));
@@ -362,8 +395,11 @@ public sealed class GameData
                     BuildTicks = buildSeconds * GameState.TicksPerSecond,
                     Storage = b.TryGetProperty("storage", out var st) ? st.GetInt32() : 0,
                     StartStock = Amounts(b, "start_stock", id),
-                    GathersFrom = gathers,
-                    GatherRadius = radius,
+                    Gather = gather,
+                    DefaultRecipe = defaultRecipe,
+                    FieldWidth = fieldW,
+                    FieldHeight = fieldH,
+                    Daily = b.TryGetProperty("daily", out var dy) && dy.GetBoolean(),
                     Recipes = recipes.ToArray(),
                     Beds = b.TryGetProperty("beds", out var bd) ? bd.GetInt32() : 1,
                     StartPeople = startPeople.ToArray(),
@@ -385,6 +421,32 @@ public sealed class GameData
         if (!e.TryGetProperty(property, out var v) || v.ValueKind != JsonValueKind.String || v.GetString() is not { Length: > 0 } s)
             throw new GameDataException($"{where}: saknar {property}");
         return s;
+    }
+
+    private static GatherDef ParseGather(JsonElement g, string where)
+    {
+        var terrain = ParseTerrain(RequireString(g, "terrain", where), where);
+        int radius = g.GetProperty("radius").GetInt32();
+        int perTile = g.TryGetProperty("per_tile", out var pt) ? pt.GetInt32() : 0;
+        int plantEvery = g.TryGetProperty("plant_every", out var pe) ? pe.GetInt32() : 0;
+        if (radius < 0 || perTile is < 0 or > 255 || plantEvery < 0 || (plantEvery > 0 && perTile == 0))
+            throw new GameDataException($"{where}: gathers går inte ihop");
+        return new GatherDef(terrain, radius, perTile, plantEvery);
+    }
+
+    private static FoodBonus ParseBonus(string name) => name switch
+    {
+        "fart" => FoodBonus.Speed,
+        "arbete" => FoodBonus.Work,
+        "anfall" => FoodBonus.Attack,
+        _ => throw new GameDataException($"food.json: okänd bonus {name}"),
+    };
+
+    /// <summary>Hur många procent bonusen ger, från den mat som ger den.</summary>
+    public int BonusPercent(FoodBonus bonus)
+    {
+        foreach (var f in Foods) if (f.Bonus == bonus) return f.BonusPercent;
+        return 0;
     }
 
     private static FactionRule ParseFaction(string name, string where) => name switch
@@ -427,8 +489,11 @@ public sealed class GameData
             h.Add(b.BuildTicks);
             h.Add(b.Storage);
             AddAmounts(ref h, b.StartStock);
-            h.Add(b.GathersFrom.HasValue ? (int)b.GathersFrom.Value : -1);
-            h.Add(b.GatherRadius);
+            AddGather(ref h, b.Gather);
+            h.Add(b.DefaultRecipe);
+            h.Add(b.FieldWidth);
+            h.Add(b.FieldHeight);
+            h.Add(b.Daily);
             h.Add(b.Recipes.Length);
             foreach (var r in b.Recipes)
             {
@@ -436,6 +501,7 @@ public sealed class GameData
                 AddAmounts(ref h, r.Out);
                 h.Add(r.Ticks);
                 h.Add((byte)r.Faction);
+                AddGather(ref h, r.Gather);
             }
             h.Add(b.Beds);
             h.Add(b.StartPeople.Length);
@@ -472,7 +538,7 @@ public sealed class GameData
             h.Add(f.Good);
             h.Add(f.Mood);
             h.Add(f.With);
-            AddString(ref h, f.Bonus);
+            h.Add((byte)f.Bonus);
             h.Add(f.BonusPercent);
             h.Add(f.BonusTicks);
         }
@@ -484,6 +550,16 @@ public sealed class GameData
             h.Add(p.Tool);
         }
         return h.Value;
+    }
+
+    private static void AddGather(ref StateHasher h, GatherDef? g)
+    {
+        h.Add(g is not null);
+        if (g is null) return;
+        h.Add((int)g.Terrain);
+        h.Add(g.Radius);
+        h.Add(g.PerTile);
+        h.Add(g.PlantEvery);
     }
 
     private static void AddString(ref StateHasher h, string s)

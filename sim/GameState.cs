@@ -210,17 +210,23 @@ public sealed partial class GameState
 
         for (int y = origin.Y; y < origin.Y + def.Height; y++)
         for (int x = origin.X; x < origin.X + def.Width; x++)
-        {
-            var p = new TilePoint(x, y);
-            if (!Map.Inside(p) || !TerrainRules.IsBuildable(Map.TerrainAt(p)) || Map.OccupantAt(p) != 0) return false;
-            if (Map.OwnerAt(p) != GameMap.NoOwner && Map.OwnerAt(p) != player) return false;
-            foreach (var other in _buildings)
-                if (other.Entrance == p) return false;
-        }
+            if (!FreeToBuild(player, new TilePoint(x, y))) return false;
+        foreach (var p in Building.FieldTiles(def, origin))
+            if (!FreeToBuild(player, p)) return false;
 
         var door = Building.EntranceFor(def, origin);
         if (!Map.Inside(door) || !Map.IsWalkable(door, MoveClass.Foot)) return false;
         if (def.NextTo is { } terrain && !TerrainAround(def, origin, terrain)) return false;
+        return true;
+    }
+
+    /// <summary>Glänta som ingen annan äger, där inget står och som inte är någons dörr.</summary>
+    private bool FreeToBuild(byte player, TilePoint p)
+    {
+        if (!Map.Inside(p) || !TerrainRules.IsBuildable(Map.TerrainAt(p)) || Map.OccupantAt(p) != 0) return false;
+        if (Map.OwnerAt(p) != GameMap.NoOwner && Map.OwnerAt(p) != player) return false;
+        foreach (var other in _buildings)
+            if (other.Entrance == p) return false;
         return true;
     }
 
@@ -251,6 +257,12 @@ public sealed partial class GameState
             var p = new TilePoint(x, y);
             if (Map.PathAt(p) != PathState.None) Map.SetPath(p, PathState.None);
             Map.SetOccupant(p, building.Id + 1);
+            Map.SetOwner(p, player);
+        }
+        foreach (var p in Building.FieldTiles(def, origin))
+        {
+            if (Map.PathAt(p) != PathState.None) Map.SetPath(p, PathState.None);
+            Map.SetTerrain(p, Terrain.Field);
             Map.SetOwner(p, player);
         }
         return building;
@@ -326,11 +338,89 @@ public sealed partial class GameState
         UpdateSchools();
         foreach (var b in _buildings)
         {
-            var done = b.UpdateProduction(Map, closed: sunday);
+            int bonus = b.HasWorker && FindPerson(b.WorkerId) is { WorkBonusTicks: > 0 } ? Data.BonusPercent(FoodBonus.Work) : 0;
+            var done = b.UpdateProduction(TickCount, _gather ??= TryGather, closed: sunday, workBonus: bonus);
             if (done is null) continue;
             foreach (var a in done.Out) _players[b.Owner].Produced[a.Good] += a.Count;
         }
     }
+    private Func<Building, GatherDef, bool>? _gather;
+
+    /// <summary>
+    /// En samlare börjar en omgång: närmaste ruta med terrängen inom räckhåll, räknat från dörren.
+    /// Det som tar slut (sten, träd, skrot) räknas av, och en tom ruta blir glänta. Skogshuggaren
+    /// planterar en gran per PlantEvery fällda: på en glesnad ruta i skogen, annars på en glänta intill.
+    /// </summary>
+    private bool TryGather(Building b, GatherDef g)
+    {
+        var tile = NearestTile(b.Entrance, g.Radius, p => Map.TerrainAt(p) == g.Terrain);
+        if (tile is not { } t) return false;
+        if (g.PerTile == 0) return true;
+
+        if (Map.TakenAt(t) + 1 >= g.PerTile) Map.SetTerrain(t, Terrain.Clearing);
+        else Map.SetTaken(t, Map.TakenAt(t) + 1);
+
+        b.Gathered++;
+        if (g.PlantEvery > 0 && b.Gathered % g.PlantEvery == 0) Plant(b, g);
+        return true;
+    }
+
+    private void Plant(Building b, GatherDef g)
+    {
+        var thinned = NearestTile(b.Entrance, g.Radius, p => Map.TerrainAt(p) == g.Terrain && Map.TakenAt(p) > 0);
+        if (thinned is { } t)
+        {
+            Map.SetTaken(t, Map.TakenAt(t) - 1);
+            return;
+        }
+        // En ny gran på en glänta intill skogen, eller intill platsen där den sista fälldes.
+        var clearing = NearestTile(b.Entrance, g.Radius, p => CanPlantOn(b.Owner, p) && NextToTerrainOrClearedForest(p, g.Terrain));
+        if (clearing is not { } c) return;
+        Map.SetTerrain(c, g.Terrain);
+        Map.SetTaken(c, g.PerTile - 1);
+    }
+
+    private bool CanPlantOn(byte owner, TilePoint p)
+    {
+        if (Map.TerrainAt(p) != Terrain.Clearing || Map.OccupantAt(p) != 0 || Map.PathAt(p) != PathState.None) return false;
+        if (Map.OwnerAt(p) != GameMap.NoOwner && Map.OwnerAt(p) != owner) return false;
+        foreach (var other in _buildings)
+            if (Distance(other.Entrance, p) <= Pathfinder.Diagonal) return false;
+        return true;
+    }
+
+    private bool NextToTerrainOrClearedForest(TilePoint p, Terrain terrain)
+    {
+        for (int dy = -1; dy <= 1; dy++)
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            var q = new TilePoint(p.X + dx, p.Y + dy);
+            if (Map.Inside(q) && Map.TerrainAt(q) == terrain) return true;
+        }
+        // Skogen är borta: planteras där huggaren står och tittar, närmast dörren.
+        return !AnyTerrainNear(p, terrain, 8);
+    }
+
+    private bool AnyTerrainNear(TilePoint p, Terrain terrain, int radius) =>
+        NearestTile(p, radius, q => Map.TerrainAt(q) == terrain) is not null;
+
+    /// <summary>Närmaste ruta inom radien som uppfyller villkoret. Lika nära: den första i radordning.</summary>
+    private TilePoint? NearestTile(TilePoint center, int radius, Func<TilePoint, bool> match)
+    {
+        TilePoint? best = null;
+        int bestDistance = int.MaxValue, r2 = radius * radius;
+        for (int dy = -radius; dy <= radius; dy++)
+        for (int dx = -radius; dx <= radius; dx++)
+        {
+            if (dx * dx + dy * dy > r2) continue;
+            var p = new TilePoint(center.X + dx, center.Y + dy);
+            if (!Map.Inside(p) || !match(p)) continue;
+            int d = dx * dx + dy * dy;
+            if (d < bestDistance) (bestDistance, best) = (d, p);
+        }
+        return best;
+    }
+
     private void ResolveCombat() { }
     private void RunComputerPlayers() { }
 }

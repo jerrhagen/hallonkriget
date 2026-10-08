@@ -20,6 +20,9 @@ public sealed partial class GameState
     {
         foreach (var p in _people)
         {
+            if (p.SpeedBonusTicks > 0) p.SpeedBonusTicks--;
+            if (p.WorkBonusTicks > 0) p.WorkBonusTicks--;
+            if (p.AttackBonusTicks > 0) p.AttackBonusTicks--;
             if (p.Job == PersonJob.Resting)
             {
                 if (--p.Timer > 0) continue;
@@ -109,6 +112,13 @@ public sealed partial class GameState
             if (!table.TakeInput(f.Good)) continue;
             p.Mood = IntMath.Min(Data.Mood.Max, p.Mood + f.Mood);
             ateWith = f.Good;
+            _players[p.Owner].Eaten[f.Good]++;
+            switch (f.Bonus)
+            {
+                case FoodBonus.Speed: p.SpeedBonusTicks = IntMath.Max(p.SpeedBonusTicks, f.BonusTicks); break;
+                case FoodBonus.Work: p.WorkBonusTicks = IntMath.Max(p.WorkBonusTicks, f.BonusTicks); break;
+                case FoodBonus.Attack: p.AttackBonusTicks = IntMath.Max(p.AttackBonusTicks, f.BonusTicks); break;
+            }
         }
         MakeIdle(p);
     }

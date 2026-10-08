@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Hallonkriget.Sim.Data;
 using Hallonkriget.Sim.Determinism;
@@ -46,7 +47,7 @@ public sealed class Building
     public int WorkerId { get; set; } = -1;
 
     /// <summary>Receptet spelaren valt, eller -1: turas om mellan de recept som går att göra.</summary>
-    public int SelectedRecipe { get; private set; } = -1;
+    public int SelectedRecipe { get; private set; }
 
     /// <summary>Receptet som pågår, eller -1.</summary>
     public int CurrentRecipe { get; private set; } = -1;
@@ -64,6 +65,12 @@ public sealed class Building
 
     /// <summary>Yrket som utbildas just nu, eller -1.</summary>
     public int Training { get; private set; } = -1;
+
+    /// <summary>Speldagen då ett dagligt recept senast startade, eller -1.</summary>
+    private int _lastDay = -1;
+
+    /// <summary>Hur mycket byggnaden har tagit från kartan. Skogshuggaren planterar efter det.</summary>
+    internal int Gathered;
 
     private readonly List<ProfessionDef> _queue = new();
     private readonly bool[] _blocked;    // per vara: spelaren har spärrat den
@@ -86,6 +93,7 @@ public sealed class Building
         Outgoing = new int[goodCount];
         _blocked = new bool[goodCount];
         foreach (int g in def.Blocked) _blocked[g] = true;
+        SelectedRecipe = def.DefaultRecipe;
     }
 
     public static TilePoint EntranceFor(BuildingDef def, TilePoint origin) =>
@@ -93,6 +101,14 @@ public sealed class Building
 
     public bool Covers(TilePoint p) =>
         p.X >= Origin.X && p.Y >= Origin.Y && p.X < Origin.X + Def.Width && p.Y < Origin.Y + Def.Height;
+
+    /// <summary>Odlingsrutorna till höger om byggnaden, för åkern.</summary>
+    public static IEnumerable<TilePoint> FieldTiles(BuildingDef def, TilePoint origin)
+    {
+        for (int y = origin.Y; y < origin.Y + def.FieldHeight; y++)
+        for (int x = origin.X + def.Width; x < origin.X + def.Width + def.FieldWidth; x++)
+            yield return new TilePoint(x, y);
+    }
 
     // ---- Byggande ----
 
@@ -254,15 +270,22 @@ public sealed class Building
         SelectedRecipe = recipe;
     }
 
-    /// <summary>Ett tick produktion. Returnerar receptet om en omgång blev klar. Closed: söndag för lanthandeln.</summary>
-    internal Recipe? UpdateProduction(GameMap map, bool closed = false)
+    /// <summary>
+    /// Ett tick produktion. Returnerar receptet om en omgång blev klar.
+    /// gather: tar det receptet behöver från kartan, eller svarar false om inget finns inom räckhåll.
+    /// closed: söndag för lanthandeln. workBonus: arbetaren har druckit svagdricka och jobbar fortare.
+    /// </summary>
+    internal Recipe? UpdateProduction(int tick, Func<Building, GatherDef, bool> gather, bool closed = false, int workBonus = 0)
     {
         if (Stage != BuildingStage.Done || Def.Recipes.Length == 0) return null;
         if (Def.IsTrade && SelectedRecipe < 0 && CurrentRecipe < 0) return null;
 
         if (CurrentRecipe >= 0)
         {
-            if (--CycleTicksLeft > 0) return null;
+            CycleTicksLeft--;
+            // Bonusen i procent: ett extra tick arbete på vart 100/procent:e tick.
+            if (workBonus > 0 && HasWorker && tick % (100 / workBonus) == 0) CycleTicksLeft--;
+            if (CycleTicksLeft > 0) return null;
             var finished = Def.Recipes[CurrentRecipe];
             foreach (var a in finished.Out) _output[a.Good] += a.Count;
             CurrentRecipe = -1;
@@ -271,18 +294,20 @@ public sealed class Building
 
         if (Def.Worker is not null && !HasWorker) return null;
         if (closed && Def.ClosedSundays) return null;
-        if (Def.GathersFrom is { } terrain && !TerrainNearby(map, terrain, Def.GatherRadius)) return null;
+        if (Def.Daily && (GameClock.Day(tick) == _lastDay || GameClock.IsSunday(tick))) return null;
 
         int n = Def.Recipes.Length;
         for (int k = 0; k < n; k++)
         {
             int r = SelectedRecipe >= 0 ? SelectedRecipe : (_nextAutoRecipe + k) % n;
-            if (CanStart(Def.Recipes[r]))
+            var recipe = Def.Recipes[r];
+            if (CanStart(recipe) && (recipe.Gather ?? Def.Gather) is var g && (g is null || gather(this, g)))
             {
-                foreach (var a in Def.Recipes[r].In) _input[a.Good] -= a.Count;
+                foreach (var a in recipe.In) _input[a.Good] -= a.Count;
                 CurrentRecipe = r;
-                CycleTicksLeft = Def.Recipes[r].Ticks;
+                CycleTicksLeft = recipe.Ticks;
                 _nextAutoRecipe = (r + 1) % n;
+                if (Def.Daily) _lastDay = GameClock.Day(tick);
                 return null;
             }
             if (SelectedRecipe >= 0) return null;
@@ -383,20 +408,6 @@ public sealed class Building
         return null;
     }
 
-    /// <summary>Finns terrängen inom radien, räknat från dörren?</summary>
-    private bool TerrainNearby(GameMap map, Terrain terrain, int radius)
-    {
-        int r2 = radius * radius;
-        for (int dy = -radius; dy <= radius; dy++)
-        for (int dx = -radius; dx <= radius; dx++)
-        {
-            if (dx * dx + dy * dy > r2) continue;
-            var p = new TilePoint(Entrance.X + dx, Entrance.Y + dy);
-            if (map.Inside(p) && map.TerrainAt(p) == terrain) return true;
-        }
-        return false;
-    }
-
     internal void AddToHash(ref StateHasher h)
     {
         h.Add(Id);
@@ -416,6 +427,8 @@ public sealed class Building
         h.Add(CurrentRecipe);
         h.Add(CycleTicksLeft);
         h.Add(_nextAutoRecipe);
+        h.Add(_lastDay);
+        h.Add(Gathered);
         foreach (int d in _delivered) h.Add(d);
         h.AddSparse(_input);
         h.AddSparse(_output);

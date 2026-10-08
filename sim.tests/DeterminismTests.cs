@@ -42,8 +42,9 @@ public class DeterminismTests
         Assert.Equal(GoldenHash, state.Hash());
     }
 
-    // Ändrad när humör, kafferepet, bygdegården och lanthandeln kom in (fas 1), och när den som ger upp tar varan med hem.
-    private const ulong GoldenHash = 12686261674292667892UL;
+    // Ändrad när humör, kafferepet, bygdegården och lanthandeln kom in (fas 1), och när alla byggnaderna,
+    // odlingsrutorna, terräng som tar slut och matens bonusar kom in (fas 2).
+    private const ulong GoldenHash = 1862245375867185353UL;
 
     [Fact]
     public void ReplayThroughByteFormatGivesSameHash()
