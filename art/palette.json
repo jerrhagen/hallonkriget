@@ -43,5 +43,17 @@
   "smorblomma": "#f0c93a",
   "blaklocka": "#7d86c4",
   "klover": "#c9708e",
-  "emalj_bla": "#5d7ea6"
+  "emalj_bla": "#5d7ea6",
+
+  "gran": "#46603d",
+  "gran_mork": "#2f4330",
+  "vatten": "#86a5b8",
+  "vatten_ljus": "#b7cdd6",
+  "vatten_mork": "#5a7b90",
+  "myr": "#7b7445",
+  "myr_mork": "#57532f",
+  "hallon": "#b8324a",
+  "kart": "#9aab4a",
+  "grus": "#bfa77f",
+  "plojd": "#9b7a52"
 }
