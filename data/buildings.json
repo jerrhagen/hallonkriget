@@ -1,5 +1,5 @@
 {
-  "_kommentar": "Byggnaderna i docs/produktionskedjor.md, alla 45 (stugan och mangårdsbyggnaden är en rad där). Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (Arons beslut 2026-10-08). default_recipe: receptet som är valt från början, annars turas byggnaden om. field: odlingsrutor till höger om byggnaden. daily: ett recept per speldag, på morgonen, inte på söndagar. gathers i ett recept gäller bara det receptet. Logen, vedtraven, hundkojan och hundgården gör inget förrän striden kommer i fas 3. per_tile i gathers: så mycket ger en ruta innan den blir glänta. plant_every: skogshuggaren planterar en gran per så många fällda.",
+  "_kommentar": "Byggnaderna i docs/produktionskedjor.md, alla 45 (stugan och mangårdsbyggnaden är en rad där). Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (Arons beslut 2026-10-08). default_recipe: receptet som är valt från början, annars turas byggnaden om. field: odlingsrutor till höger om byggnaden. daily: ett recept per speldag, på morgonen, inte på söndagar. gathers i ett recept gäller bara det receptet. barracks: logen, som tar emot utrustningen i units.json och gör soldater av rekryter. per_tile i gathers: så mycket ger en ruta innan den blir glänta. plant_every: skogshuggaren planterar en gran per så många fällda.",
   "buildings": [
     {
       "id": "stugan",
@@ -1133,7 +1133,8 @@
         "brador": 10,
         "sten": 6
       },
-      "beds": 20
+      "beds": 20,
+      "barracks": true
     },
     {
       "id": "vedtraven",

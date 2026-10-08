@@ -56,7 +56,7 @@ public sealed partial class GameState
         for (int i = 0; i < setup.Players.Count; i++)
         {
             var p = setup.Players[i];
-            state._players.Add(new Player((byte)i, p.Faction, p.IsComputer, state.Data.Goods.Count));
+            state._players.Add(new Player((byte)i, p.Faction, p.IsComputer, state.Data.Goods.Count, state.Data.Units.Count));
         }
         for (int i = 0; i < setup.Players.Count; i++)
         {
@@ -75,6 +75,7 @@ public sealed partial class GameState
             foreach (var group in def.StartPeople)
                 for (int k = 0; k < group.Count; k++)
                     state.SpawnProfession((byte)i, state.Data.Professions[group.Profession], home.Entrance);
+            state.SpawnHero((byte)i, home);
         }
         return state;
     }
@@ -110,6 +111,7 @@ public sealed partial class GameState
         foreach (var b in _buildings) b.AddToHash(ref h);
         AddPeopleToHash(ref h);
         AddDeliveriesToHash(ref h);
+        AddMilitaryToHash(ref h);
         h.Add(_nextWalkerId);
         h.Add(_walkers.Count);
         foreach (var w in _walkers) w.AddToHash(ref h);
@@ -151,6 +153,33 @@ public sealed partial class GameState
                     break;
                 case CommandType.BlockGood:
                     if (OwnBuilding(c.Player, c.A) is { } blocked) blocked.SetBlocked(c.B, c.C != 0);
+                    break;
+                case CommandType.Equip:
+                    Equip(c.Player, c.A, c.B, c.C);
+                    break;
+                case CommandType.MoveGroup:
+                    MoveGroup(c.Player, c.A, new TilePoint(c.B, c.C));
+                    break;
+                case CommandType.AttackGroup:
+                    AttackGroup(c.Player, c.A, c.B);
+                    break;
+                case CommandType.AttackBuilding:
+                    AttackBuilding(c.Player, c.A, c.B);
+                    break;
+                case CommandType.SetFormation:
+                    SetFormation(c.Player, c.A, c.B);
+                    break;
+                case CommandType.TurnGroup:
+                    TurnGroup(c.Player, c.A, c.B);
+                    break;
+                case CommandType.SplitGroup:
+                    SplitGroup(c.Player, c.A);
+                    break;
+                case CommandType.MergeGroups:
+                    MergeGroups(c.Player, c.A, c.B);
+                    break;
+                case CommandType.HaltGroup:
+                    HaltGroup(c.Player, c.A);
                     break;
             }
         }
@@ -421,6 +450,5 @@ public sealed partial class GameState
         return best;
     }
 
-    private void ResolveCombat() { }
     private void RunComputerPlayers() { }
 }

@@ -14,7 +14,10 @@ public class SchoolTests
     {
         // Beslut 2026-10-08: tre bärare, två hantlangare och sex arbetare för de första husen.
         var farm = new Farm(start: new TilePoint(5, 5));
-        Assert.Equal(11, farm.State.People.Count(p => p.Owner == 0));
+        Assert.Equal(11, farm.State.People.Count(p => p.Owner == 0 && p.Role != PersonRole.Soldier));
+        // Och gubben, som bor i stugan och inte räknas i befolkningen.
+        Assert.Single(farm.State.People, p => p.Owner == 0 && p.Role == PersonRole.Soldier);
+        Assert.Equal(11, farm.State.Population(0));
         foreach (var job in new[] { "skogshuggare", "sagare", "vedhuggare", "stenrojare", "bonde", "vattenbarare" })
             Assert.Equal(1, Count(farm, job));
     }
@@ -47,7 +50,7 @@ public class SchoolTests
         farm.Command(CommandType.Train, school.Id, farm.Data.ProfessionIndex("barare"));
         farm.Run(1500);
         Assert.Equal(-1, school.Training);
-        Assert.Equal(11, farm.State.People.Count);
+        Assert.Equal(11, farm.State.Population(0));
     }
 
     [Fact]

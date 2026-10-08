@@ -50,8 +50,23 @@ public sealed partial class GameState
 
     private Person? FindPerson(int id)
     {
-        foreach (var p in _people) if (p.Id == id) return p;
-        return null;
+        int i = PersonIndex(id);
+        return i >= 0 ? _people[i] : null;
+    }
+
+    /// <summary>Platsen i listan. Personerna ligger i id-ordning, så det går att söka binärt.</summary>
+    private int PersonIndex(int id)
+    {
+        int lo = 0, hi = _people.Count - 1;
+        while (lo <= hi)
+        {
+            int mid = (lo + hi) / 2;
+            int m = _people[mid].Id;
+            if (m == id) return mid;
+            if (m < id) lo = mid + 1;
+            else hi = mid - 1;
+        }
+        return -1;
     }
 
     private void PlanPath(byte player, TilePoint tile)
@@ -64,11 +79,18 @@ public sealed partial class GameState
 
     private void UpdatePeople()
     {
+        UpdateGroups();
         foreach (var p in _people)
         {
             if (p.Inside)
             {
                 if (p.Job == PersonJob.AtWork) LeaveWorkToEat(p);
+                else if (p.Job == PersonJob.InBarracks) LeaveBarracksToEat(p);
+                continue;
+            }
+            if (p.Role == PersonRole.Soldier && p.Job is PersonJob.Idle or PersonJob.Soldiering)
+            {
+                UpdateSoldier(p);
                 continue;
             }
             if (p.IsMoving)
@@ -91,7 +113,8 @@ public sealed partial class GameState
 
         var next = p.Path[p.PathIndex + 1];
         var goal = p.Path[^1];
-        if (next != goal && !Map.IsWalkable(next, MoveClass.Foot))
+        var move = MoveOf(p);
+        if (next != goal && !Map.IsWalkable(next, move))
         {
             // Något har byggts i vägen sedan vägen räknades ut.
             if (!WalkTo(p, goal)) StopWalking(p);
@@ -114,7 +137,7 @@ public sealed partial class GameState
         p.PathIndex++;
         // Det som blev över från förra steget följer med, så att farten blir rätt över långa sträckor.
         int carry = p.StepProgress - p.StepTotal;
-        p.StepTotal = (diagonal ? Pathfinder.Diagonal : Pathfinder.Straight) * Map.StepCost(next, MoveClass.Foot) * 10;
+        p.StepTotal = (diagonal ? Pathfinder.Diagonal : Pathfinder.Straight) * Map.StepCost(next, move) * 10;
         p.StepProgress = carry + EffectiveSpeed(p);
     }
 
@@ -130,7 +153,7 @@ public sealed partial class GameState
         p.StepProgress = p.StepTotal = 0;
         p.From = p.Tile;
         if (p.Tile == destination) return true;
-        if (!Paths.FindPath(p.Tile, destination, MoveClass.Foot, p.Path))
+        if (!Paths.FindPath(p.Tile, destination, MoveOf(p), p.Path))
         {
             p.Path.Clear();
             return false;
@@ -155,6 +178,7 @@ public sealed partial class GameState
             case PersonJob.Idle:
                 if (p.Role == PersonRole.Laborer) FindLaborerJob(p);
                 else if (p.Role == PersonRole.Worker) FindWorkplace(p);
+                else if (p.Role == PersonRole.Recruit) FindBarracks(p);
                 break;
 
             case PersonJob.ToSite:
@@ -188,6 +212,11 @@ public sealed partial class GameState
 
             case PersonJob.ToWorkplace:
             {
+                if (p.Role == PersonRole.Recruit)
+                {
+                    EnterBarracks(p);
+                    break;
+                }
                 var work = _buildings[p.Target];
                 if (work.WorkerId != p.Id || p.Tile != work.Entrance)
                 {

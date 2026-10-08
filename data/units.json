@@ -1,0 +1,28 @@
+{
+  "_kommentar": "Stridsenheterna, designdokumentet (Enheter, Strid) och Produktionskedjor (Vad varje enhet kräver). attack och defence är humör per slag, mood är enhetens max, speed är tiondels rutor per sekund på gräs, range är rutor (0 är närstrid). gear är det logen förbrukar per figur, recruits hur många rekryter. squad: så många figurer ger en beställning i logen. group_max: största grupp. ammo: varan som fyller på skotten och hur många skott en vara ger; varje figur bär högst 10. scare: sänker fiendens humör per sekund inom radien; timid_only betyder bara höns och pysslingar. timid: höns och liknande tappar dubbelt av skräms. breaks_walls: slår sönder gärdsgård och staket. hit_one_in: avståndsvapen som bara träffar en gång av så många, men den som träffas ger upp direkt (salthagelbössan). fixed: enheten sitter i den byggnaden (vedtraven, hundkojan).",
+  "rules": {
+    "strike_seconds": 2,
+    "sight": 6,
+    "group_max": 20,
+    "max_shots": 10,
+    "soldier_hunger_percent": 150,
+    "combat_hunger_percent": 200,
+    "medal_after": 3,
+    "capture_seconds": 20,
+    "logen_stock": 20
+  },
+  "units": [
+    { "id": "rafsbrigaden", "name": "Räfsbrigaden", "faction": "both", "attack": 4, "defence": 1, "mood": 60, "speed": 10, "recruits": 1, "gear": { "rafsa": 1, "stickad_mossa": 1 } },
+    { "id": "hogaffelgardet", "name": "Högaffelgardet", "faction": "both", "attack": 6, "defence": 4, "mood": 90, "speed": 8, "recruits": 1, "gear": { "hogaffel": 1, "kastrullock": 1, "lovikkavantar": 1 } },
+    { "id": "slangbellepojkarna", "name": "Slangbellepojkarna", "faction": "both", "attack": 3, "range": 6, "defence": 0, "mood": 50, "speed": 11, "recruits": 1, "gear": { "slangbella": 1, "kart": 10, "stickad_mossa": 1 }, "ammo": { "good": "kart", "shots": 1 } },
+    { "id": "gasskvadronen", "name": "Gåsskvadronen", "faction": "both", "attack": 2, "defence": 0, "mood": 40, "speed": 15, "recruits": 0, "squad": 5, "gear": { "gas": 1 }, "scare": { "radius": 2, "per_second": 5 } },
+    { "id": "kaffedrangen", "name": "Kaffedrängen", "faction": "both", "attack": 0, "defence": 0, "mood": 60, "speed": 10, "recruits": 1, "gear": { "bricka": 1 }, "server": true },
+    { "id": "honschocktruppen", "name": "Höns-chocktruppen", "faction": "torpet", "attack": 2, "range": 3, "defence": 1, "mood": 30, "speed": 13, "recruits": 0, "squad": 10, "group_max": 10, "timid": true, "gear": { "hona": 1, "syfingerborgar": 1, "stickad_mossa": 1, "hardkokta_agg": 1 }, "ammo": { "good": "hardkokta_agg", "shots": 10 } },
+    { "id": "vedkatapulten", "name": "Vedkatapulten", "faction": "torpet", "attack": 20, "range": 8, "defence": 2, "mood": 100, "speed": 4, "recruits": 2, "group_max": 1, "breaks_walls": true, "gear": { "brador": 3, "hjul": 2, "jarn": 1 }, "ammo": { "good": "ved", "shots": 1 } },
+    { "id": "flaskkavalleriet", "name": "Fläskkavalleriet", "faction": "storgarden", "attack": 8, "defence": 3, "mood": 100, "speed": 14, "recruits": 1, "breaks_walls": true, "vehicle": true, "gear": { "sugga": 1, "sadel": 1, "tralans": 1, "stickad_mossa": 1 } },
+    { "id": "traktorn", "name": "Traktorn", "faction": "storgarden", "attack": 15, "defence": 8, "mood": 150, "speed": 6, "recruits": 1, "group_max": 1, "breaks_walls": true, "vehicle": true, "gear": { "jarn": 4, "hjul": 4, "brador": 2, "bensin": 1 }, "fuel": { "good": "bensin", "seconds": 180 }, "scare": { "radius": 3, "per_second": 3, "timid_only": true } },
+    { "id": "gubben", "name": "Gubben", "faction": "both", "attack": 15, "range": 5, "defence": 2, "mood": 120, "speed": 7, "recruits": 0, "group_max": 1, "hero": true, "hit_one_in": 3, "max_shots": 6, "ammo": { "good": "saltpatroner", "shots": 1 } },
+    { "id": "vedtraven", "name": "Vedtraven", "faction": "both", "attack": 5, "range": 5, "defence": 6, "mood": 100, "speed": 0, "fixed": "vedtraven", "ammo": { "good": "ved", "shots": 1 } },
+    { "id": "hundkojan", "name": "Hundkojan", "faction": "both", "attack": 6, "range": 0, "reach": 2, "defence": 3, "mood": 80, "speed": 0, "fixed": "hundkojan", "scare": { "radius": 2, "per_second": 3, "timid_only": true } }
+  ]
+}

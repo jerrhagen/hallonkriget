@@ -14,7 +14,19 @@ namespace Hallonkriget.Sim;
 /// </summary>
 public sealed partial class GameState
 {
-    private bool Hungry(Person p) => p.Mood <= Data.Mood.EatAt;
+    /// <summary>Hungrig vid 30 av 100, och lika stor del av max för soldater.</summary>
+    private bool Hungry(Person p) => p.Mood <= MaxMood(p) * Data.Mood.EatAt / Data.Mood.Max;
+
+    /// <summary>Humörets max: 100, eller enhetens för en soldat.</summary>
+    public int MaxMood(Person p) => p.Unit >= 0 ? Data.Units[p.Unit].Mood : Data.Mood.Max;
+
+    /// <summary>Tick per humörenhet. Soldater tappar 50 procent fortare, dubbelt i strid.</summary>
+    private int MoodTicks(Person p)
+    {
+        if (p.Role != PersonRole.Soldier) return Data.Mood.TicksPerPoint;
+        int percent = p.CombatTicks > 0 ? Data.Combat.CombatHungerPercent : Data.Combat.SoldierHungerPercent;
+        return IntMath.Max(1, Data.Mood.TicksPerPoint * 100 / percent);
+    }
 
     private void UpdateMood()
     {
@@ -28,14 +40,15 @@ public sealed partial class GameState
                 if (--p.Timer > 0) continue;
                 if (p.Inside) PeopleOnTile[Map.Index(p.Tile)]++;
                 p.Inside = false;
-                p.Mood = Data.Mood.Max;
-                p.MoodTimer = Data.Mood.TicksPerPoint;
+                p.Mood = MaxMood(p);
+                p.MoodTimer = MoodTicks(p);
+                if (IsHero(p) && HomeOf(p.Owner) is { } home) TopUpShots(p, Data.Units[p.Unit], home);
                 MakeIdle(p);
                 continue;
             }
-            if (p.Job == PersonJob.ToHome) continue;
+            if (p.Job == PersonJob.ToHome || IsHero(p)) continue;
             if (--p.MoodTimer > 0) continue;
-            p.MoodTimer = Data.Mood.TicksPerPoint;
+            p.MoodTimer = MoodTicks(p);
             if (--p.Mood <= 0) GiveUp(p);
         }
     }
@@ -107,10 +120,10 @@ public sealed partial class GameState
         int ateWith = -1;
         foreach (var f in Data.Foods)
         {
-            if (p.Mood >= Data.Mood.Max) break;
+            if (p.Mood >= MaxMood(p)) break;
             if (f.With >= 0 && f.With != ateWith) continue;
             if (!table.TakeInput(f.Good)) continue;
-            p.Mood = IntMath.Min(Data.Mood.Max, p.Mood + f.Mood);
+            p.Mood = IntMath.Min(MaxMood(p), p.Mood + f.Mood);
             ateWith = f.Good;
             _players[p.Owner].Eaten[f.Good]++;
             switch (f.Bonus)
@@ -128,6 +141,8 @@ public sealed partial class GameState
     {
         p.Mood = 0;
         _players[p.Owner].GaveUp++;
+        if (p.Role == PersonRole.Soldier) SoldierGivesUp(p);
+        if (_leaving.Contains(p.Id)) return;
         LeaveBuilding(p);
         // Leveransen släpps, men varan följer med hem och läggs i stugan (beslut 2026-10-08).
         if (p.Job is PersonJob.ToPickup or PersonJob.ToDropoff && FindDelivery(p.Target) is { } d) CancelDelivery(d, p);
@@ -183,7 +198,7 @@ public sealed partial class GameState
     public int Population(byte owner)
     {
         int n = 0;
-        foreach (var p in _people) if (p.Owner == owner) n++;
+        foreach (var p in _people) if (p.Owner == owner && !NeedsNoBed(p)) n++;
         foreach (var b in _buildings) if (b.Owner == owner && b.Training >= 0) n++;
         return n;
     }
