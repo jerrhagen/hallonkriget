@@ -19,7 +19,8 @@ namespace Hallonkriget.Game;
 ///
 /// Från kommandoraden, efter "--": --karta=hemmanet, --lager=storgarden, --byggordning=namn spelar
 /// en byggordning åt spelaren, --spola=minuter spolar fram, --skarmbild=fil.png tar en bild och
-/// avslutar, --zoom=0.5 och --kamera=x,y (rutor) ställer kameran, --utan-papper, --provspara.
+/// avslutar, --zoom=0.5 och --kamera=x,y (rutor) ställer kameran, --utan-papper, --provspara, --filma=bilder
+/// (en bild var tredje bildruta till skarmbild_000.png och framåt), --hastighet=2.
 /// För skärmbilder: --valj=bygdegarden (eller byggnadsnummer) öppnar en byggnad, --bygga=id och --mus=x,y visar en byggnad som ska placeras.
 /// </summary>
 public partial class Gard : Node2D
@@ -34,6 +35,7 @@ public partial class Gard : Node2D
     private string? _screenshot;
     private int _framesUntilScreenshot = 30;
     private bool _dragging;
+    private int _filmFrames, _filmed, _frameCounter;
 
     public LocalMatch Match => _match;
     public WorldView World => _world;
@@ -89,6 +91,8 @@ public partial class Gard : Node2D
         AddPaper();
         _paper.Visible = !_args.ContainsKey("utan-papper");
         if (_args.TryGetValue("skarmbild", out var shot)) _screenshot = shot;
+        if (_args.TryGetValue("filma", out var film)) _filmFrames = int.Parse(film);
+        if (_args.TryGetValue("hastighet", out var speed)) _match.Speed = int.Parse(speed);
         if (_args.TryGetValue("vanta", out var w)) _framesUntilScreenshot = int.Parse(w);
     }
 
@@ -149,6 +153,18 @@ public partial class Gard : Node2D
         _camera.Position += pan * 700 * (float)delta / _camera.Zoom.X;
         ClampCamera();
 
+        if (_screenshot is not null && _filmFrames > 0)
+        {
+            if (--_framesUntilScreenshot > 0) return;
+            // --filma=bilder: en bild var tredje bildruta, numrerade, sedan avslutas spelet.
+            if (_frameCounter++ % 3 == 0)
+            {
+                var path = _screenshot.Replace(".png", $"_{_filmed++:D3}.png");
+                GetViewport().GetTexture().GetImage().SavePng(path);
+                if (_filmed >= _filmFrames) GetTree().Quit();
+            }
+            return;
+        }
         if (_screenshot is not null && --_framesUntilScreenshot <= 0)
         {
             GetViewport().GetTexture().GetImage().SavePng(_screenshot);

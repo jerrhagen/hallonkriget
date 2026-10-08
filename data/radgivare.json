@@ -32,8 +32,8 @@
         "Ingen bär något. Jag bär inget heller, jag är en katt."
       ],
       "bararna_hinner_inte": [
-        "Bärarna springer hela tiden och hinner ändå inte. Det behövs fler.",
-        "Varje bärare har något i famnen och varorna väntar i kö. Fler bärare."
+        "Bärarna springer hela tiden, ingen står still. Det behövs fler.",
+        "Varje bärare har något i famnen. Fler bärare."
       ],
       "forradet_fullt": [
         "{byggnad} är full. Det går inte att få in något mer.",
@@ -93,8 +93,8 @@
         "Bärarna saknas. Allt står still."
       ],
       "bararna_hinner_inte": [
-        "Samtliga bärare är upptagna och varorna väntar. Fler behövs.",
-        "Bärarna hinner inte med. Förstärkning behövs."
+        "Samtliga bärare är upptagna, hela tiden. Fler behövs.",
+        "Ingen bärare är ledig. Förstärkning behövs."
       ],
       "forradet_fullt": [
         "{byggnad} är full till taket.",
