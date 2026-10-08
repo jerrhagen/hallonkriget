@@ -1,9 +1,12 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
 using Godot;
 using Hallonkriget.Game.Net;
+using Hallonkriget.Game.Ui;
 using Hallonkriget.Game.View;
 using Hallonkriget.Sim;
+using Hallonkriget.Sim.Map;
 
 namespace Hallonkriget.Game;
 
@@ -11,17 +14,20 @@ namespace Hallonkriget.Game;
 /// Spelet i fas 2: en gård att bygga på kartan hemmanet, utan strid.
 ///
 /// Styrning: pilar eller WASD flyttar, mushjulet zoomar, mellersta musknappen drar kartan.
-/// Mellanslag pausar, 1 och 2 väljer hastighet.
+/// Mellanslag pausar, 1 och 2 väljer hastighet. Vänsterklick väljer och bygger, högerklick eller Escape avbryter.
+/// F5 sparar och F9 laddar snabbsparet.
 ///
 /// Från kommandoraden, efter "--": --karta=hemmanet, --lager=storgarden, --byggordning=namn spelar
 /// en byggordning åt spelaren, --spola=minuter spolar fram, --skarmbild=fil.png tar en bild och
-/// avslutar, --zoom=0.5 och --kamera=x,y (rutor) ställer kameran, --utan-papper.
+/// avslutar, --zoom=0.5 och --kamera=x,y (rutor) ställer kameran, --utan-papper, --provspara.
+/// För skärmbilder: --valj=bygdegarden (eller byggnadsnummer) öppnar en byggnad, --bygga=id och --mus=x,y visar en byggnad som ska placeras.
 /// </summary>
 public partial class Gard : Node2D
 {
     private LocalMatch _match = null!;
     private WorldView _world = null!;
     private Camera2D _camera = null!;
+    private Hud _hud = null!;
     private CanvasLayer _paper = null!;
     private Dictionary<string, string> _args = new();
     private string? _screenshot;
@@ -61,6 +67,22 @@ public partial class Gard : Node2D
         }
         if (_args.TryGetValue("zoom", out var z)) _camera.Zoom = Vector2.One * float.Parse(z, CultureInfo.InvariantCulture);
 
+        _hud = new Hud { Name = "Hud" };
+        AddChild(_hud);
+        _hud.Attach(_match, _world);
+        _hud.SaveRequested = Save;
+        _hud.LoadRequested = Load;
+        if (_args.TryGetValue("valj", out var sel))
+            _hud.Select(int.TryParse(sel, out int id) ? id : _match.State.Buildings.First(b => b.Def.Id == sel).Id);
+        if (_args.TryGetValue("bygga", out var place)) _hud.StartPlacing(data.Building(place));
+        if (_args.TryGetValue("mus", out var mouse))
+        {
+            var xy = mouse.Split(',');
+            _hud.MouseMoved(new TilePoint(int.Parse(xy[0]), int.Parse(xy[1])), false);
+        }
+
+        if (_args.ContainsKey("provspara")) TrySaveAndLoad();
+
         AddPaper();
         _paper.Visible = !_args.ContainsKey("utan-papper");
         if (_args.TryGetValue("skarmbild", out var shot)) _screenshot = shot;
@@ -72,6 +94,43 @@ public partial class Gard : Node2D
     {
         _match = match;
         _world.Attach(match);
+        _hud.Attach(match, _world);
+    }
+
+    private static string QuickSave => System.IO.Path.Combine(GameFiles.SaveDir, "snabbspar.hkr");
+
+    private void Save()
+    {
+        System.IO.Directory.CreateDirectory(GameFiles.SaveDir);
+        _match.Save(QuickSave);
+        GD.Print($"Sparat: {QuickSave}");
+    }
+
+    /// <summary>--provspara: sparar, laddar och jämför kontrollsumman. Skriver resultatet.</summary>
+    private void TrySaveAndLoad()
+    {
+        ulong before = _match.State.Hash();
+        int tick = _match.State.TickCount;
+        Save();
+        Load();
+        GD.Print(_match.State.Hash() == before && _match.State.TickCount == tick
+            ? $"Provsparning: samma tillstånd efter laddning, tick {tick}"
+            : "Provsparning: FEL, tillståndet skiljer sig efter laddning");
+    }
+
+    private void Load()
+    {
+        if (!System.IO.File.Exists(QuickSave)) return;
+        try
+        {
+            var loaded = LocalMatch.Load(QuickSave, _match.Data);
+            loaded.Speed = 0;
+            Replace(loaded);
+        }
+        catch (System.Exception ex)
+        {
+            GD.PrintErr($"Kunde inte ladda {QuickSave}: {ex.Message}");
+        }
     }
 
     public override void _Process(double delta)
@@ -104,16 +163,27 @@ public partial class Gard : Node2D
             if (key.Keycode is Key.Plus or Key.KpAdd or Key.Equal) ZoomBy(1.25f);
             if (key.Keycode is Key.Minus or Key.KpSubtract) ZoomBy(0.8f);
             if (key.Keycode == Key.F12) _paper.Visible = !_paper.Visible;
+            if (key.Keycode == Key.Escape) _hud.Cancel();
+            if (key.Keycode == Key.F5) Save();
+            if (key.Keycode == Key.F9) Load();
         }
         if (e is InputEventMouseButton mb)
         {
             if (mb.Pressed && mb.ButtonIndex == MouseButton.WheelUp) ZoomBy(1.1f);
             if (mb.Pressed && mb.ButtonIndex == MouseButton.WheelDown) ZoomBy(1 / 1.1f);
             if (mb.ButtonIndex == MouseButton.Middle) _dragging = mb.Pressed;
+            if (mb.Pressed && mb.ButtonIndex == MouseButton.Left) _hud.LeftClick(MouseTile(), mb.ShiftPressed);
+            if (mb.Pressed && mb.ButtonIndex == MouseButton.Right) _hud.Cancel();
         }
-        if (e is InputEventMouseMotion motion && _dragging)
-            _camera.Position -= motion.Relative / _camera.Zoom.X;
+        if (e is InputEventMouseMotion motion)
+        {
+            if (_dragging) _camera.Position -= motion.Relative / _camera.Zoom.X;
+            _hud.MouseMoved(MouseTile(), (motion.ButtonMask & MouseButtonMask.Left) != 0);
+        }
     }
+
+    private TilePoint MouseTile() => WorldView.TileAt(GetGlobalMousePosition());
+
 
     private void ZoomBy(float factor)
     {

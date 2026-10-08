@@ -64,6 +64,12 @@ public partial class WorldView : Node2D
         foreach (var p in _people.Values) p.Interpolate(alpha);
     }
 
+    /// <summary>Markerar den valda byggnaden, eller ingen med -1.</summary>
+    public void SetSelected(int buildingId)
+    {
+        foreach (var b in _buildings) b.Selected = b.Building.Id == buildingId;
+    }
+
     /// <summary>Världskoordinat för mitten av en ruta.</summary>
     public static Vector2 TileCenter(TilePoint p) => new((p.X + 0.5f) * Tile, (p.Y + 0.5f) * Tile);
 
