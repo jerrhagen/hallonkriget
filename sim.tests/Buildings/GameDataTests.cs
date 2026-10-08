@@ -55,7 +55,9 @@ public class GameDataTests
             }
         }
 
-        var used = data.Buildings.SelectMany(b => b.Recipes.SelectMany(r => r.In).Concat(b.Cost)).Select(a => a.Good).Distinct();
+        // Lanthandelns byten räknas inte: de är olika sätt att betala, och spelaren väljer det som finns.
+        var used = data.Buildings.Where(b => !b.IsTrade)
+            .SelectMany(b => b.Recipes.SelectMany(r => r.In).Concat(b.Cost)).Select(a => a.Good).Distinct();
         var missing = used.Where(g => !producible[g]).Select(g => data.Goods[g].Id).ToList();
         Assert.True(missing.Count == 0, "Kan inte tillverkas: " + string.Join(", ", missing));
     }
@@ -103,5 +105,55 @@ public class GameDataTests
         Assert.NotEqual(WithBuildings(a).Fingerprint, WithBuildings(b).Fingerprint);
         // Namnen är bara text för spelaren och påverkar inte matchen.
         Assert.Equal(WithBuildings(a).Fingerprint, WithBuildings(a.Replace("\"X\"", "\"Y\"")).Fingerprint);
+    }
+
+    [Fact]
+    public void FoodMatchesTheTable()
+    {
+        // Designdokumentet, Mat och humör.
+        var data = TestData.Game;
+        var mood = data.Foods.ToDictionary(f => data.Goods[f.Good].Id, f => f.Mood);
+        Assert.Equal(30, mood["knackebrod"]);
+        Assert.Equal(30, mood["abborre"]);
+        Assert.Equal(45, mood["korv"]);
+        Assert.Equal(60, mood["pannkakor"]);
+        Assert.Equal(15, mood["sylt"]);
+        Assert.Equal(10, mood["svagdricka"]);
+        Assert.Equal(20, mood["kaffe"]);
+        Assert.Equal(data.GoodIndex("pannkakor"), data.Food(data.GoodIndex("sylt"))!.With);
+        // Det bästa står först, så att det äts först.
+        Assert.Equal(data.Foods.Where(f => f.With < 0).OrderByDescending(f => f.Mood).Select(f => f.Good),
+                     data.Foods.Where(f => f.With < 0).Select(f => f.Good));
+        Assert.Equal(60, data.Mood.TicksPerPoint);
+        Assert.Equal(30, data.Mood.EatAt);
+        Assert.Equal(1800, data.Mood.RestTicks);
+    }
+
+    [Fact]
+    public void EveryWorkerHasAProfession()
+    {
+        var data = TestData.Game;
+        foreach (var b in data.Buildings.Where(b => b.Worker is not null))
+            Assert.Contains(data.Professions, p => p.Id == b.Worker);
+        // Bärare och hantlangare behöver inget verktyg, alla andra ett.
+        Assert.All(data.Professions, p => Assert.Equal(p.Role == Hallonkriget.Sim.People.PersonRole.Worker, p.Tool >= 0));
+    }
+
+    [Fact]
+    public void UnknownWorkerIsAnError()
+    {
+        const string professions = """{ "professions": [ { "id": "vedhuggare", "name": "Vedhuggare", "role": "worker" } ] }""";
+        var e = Assert.Throws<GameDataException>(() => GameData.Parse(Goods,
+            """{ "buildings": [ { "id": "x", "name": "X", "size": [1, 1], "faction": "both", "worker": "smed", "cost": { "ved": 1 } } ] }""",
+            professionsJson: professions));
+        Assert.Contains("smed", e.Message);
+    }
+
+    [Fact]
+    public void FingerprintChangesWithTheFood()
+    {
+        const string buildings = """{ "buildings": [] }""";
+        string Food(int mood) => $$"""{ "mood": { "max": 100, "seconds_per_point": 6, "eat_at": 30, "rest_seconds": 180 }, "food": [ { "good": "ved", "mood": {{mood}} } ] }""";
+        Assert.NotEqual(GameData.Parse(Goods, buildings, Food(30)).Fingerprint, GameData.Parse(Goods, buildings, Food(31)).Fingerprint);
     }
 }

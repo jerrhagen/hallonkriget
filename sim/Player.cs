@@ -18,6 +18,9 @@ public sealed class Player
     /// <summary>Hur många av varje vara spelarens byggnader har tillverkat under matchen.</summary>
     public int[] Produced { get; }
 
+    /// <summary>Hur många gånger någon av spelarens personer har gett upp av hunger.</summary>
+    public int GaveUp { get; internal set; }
+
     public Player(byte id, Faction faction, bool isComputer, int goodCount)
     {
         Id = id;
@@ -32,5 +35,6 @@ public sealed class Player
         h.Add((byte)Faction);
         h.Add(IsComputer);
         foreach (int n in Produced) h.Add(n);
+        h.Add(GaveUp);
     }
 }

@@ -112,7 +112,7 @@ public sealed partial class GameState
         }
     }
 
-    private static void RequestedGoods(Building b, List<int> goods)
+    private void RequestedGoods(Building b, List<int> goods)
     {
         goods.Clear();
         if (b.Stage == BuildingStage.Construction)
@@ -121,13 +121,12 @@ public sealed partial class GameState
             return;
         }
         if (b.Def.IsStorage) return;
-        foreach (var r in b.Def.Recipes)
-        foreach (var a in r.In)
-            if (!goods.Contains(a.Good) && b.Uses(a.Good)) goods.Add(a.Good);
+        for (int good = 0; good < Data.Goods.Count; good++)
+            if (b.Uses(good)) goods.Add(good);
     }
 
     private static int Wanted(Building b, int good) =>
-        (b.Stage == BuildingStage.Construction ? b.MaterialNeeded(good) : b.InputSpace(good)) - b.Incoming[good];
+        b.Stage == BuildingStage.Construction ? b.MaterialNeeded(good) - b.Incoming[good] : b.RequestSpace(good);
 
     private static int Available(Building b, int good) =>
         b.Stage == BuildingStage.Done ? b.OutputCount(good) - b.Outgoing[good] : 0;

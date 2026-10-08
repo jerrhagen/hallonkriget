@@ -27,6 +27,15 @@ public enum PersonJob : byte
     Treading,
     ToWorkplace,
     AtWork,
+
+    /// <summary>På väg till kafferepet för att äta.</summary>
+    ToEat,
+
+    /// <summary>Har gett upp och går hem till stugan.</summary>
+    ToHome,
+
+    /// <summary>Ligger hemma i stugan och vilar.</summary>
+    Resting,
 }
 
 /// <summary>
@@ -69,11 +78,19 @@ public sealed class Person
     /// <summary>Inne i en byggnad: syns inte och tar ingen plats på stigen.</summary>
     public bool Inside { get; internal set; }
 
+    /// <summary>Humöret, 0–100. Ersätter både hunger och hälsa.</summary>
+    public int Mood { get; internal set; }
+
+    /// <summary>Tick kvar tills humöret sjunker en enhet.</summary>
+    public int MoodTimer { get; internal set; }
+
     internal readonly List<TilePoint> Path = new();
     internal int PathIndex;
 
-    internal Person(int id, byte owner, PersonRole role, string profession, TilePoint tile, int speed)
+    internal Person(int id, byte owner, PersonRole role, string profession, TilePoint tile, int speed, int mood, int moodTimer)
     {
+        Mood = mood;
+        MoodTimer = moodTimer;
         Id = id;
         Owner = owner;
         Role = role;
@@ -107,6 +124,8 @@ public sealed class Person
         h.Add(Carrying);
         h.Add(WaitTicks);
         h.Add(Inside);
+        h.Add(Mood);
+        h.Add(MoodTimer);
         h.Add(PathIndex);
         h.Add(Path.Count);
         foreach (var p in Path)

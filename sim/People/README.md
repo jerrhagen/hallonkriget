@@ -8,4 +8,7 @@ Personerna: bärare, hantlangare och arbetare, och hur de går. Se docs/designdo
 - Arbetare: går till närmaste byggnad med deras yrke som saknar arbetare och stannar inne.
 - Bärarnas jobb sköts av leveranssystemet i sim/Economy.
 
-Inte här än: humör och mat, bygdegården, att bärare som möts går runt varandra, drängarnas fart och två varor i taget, att skogshuggaren går ut och fäller träd.
+- Humör och mat (`GameState.Mood.cs`): humöret sjunker en enhet var 6:e sekund. Vid 30 går personen till närmaste kafferep med mat när hen gjort klart det hen håller på med, och äter det bästa först, en portion av varje sort. Vid 0 tappar hen det hen bär och vilar tre minuter i stugan.
+- Bygdegården: spelaren ställer yrken i kön (`Train`). Första i kön börjar när kaffet (eller två surrogat) och verktyget finns och det finns en sovplats ledig, och efter 30 sekunder kommer en ny person ut genom dörren.
+
+Inte här än: matens bonusar, kafferasten, kyla, att bärare som möts går runt varandra, drängarnas fart och två varor i taget, att skogshuggaren går ut och fäller träd.

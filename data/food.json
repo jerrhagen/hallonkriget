@@ -1,0 +1,18 @@
+{
+  "_kommentar": "Mat och humör, designdokumentet (Mat och humör). Humöret går från 100 till 0 och sjunker en enhet var 6:e sekund. Vid 30 går personen och äter, vid 0 ger den upp och vilar hemma. Maten står i den ordning den äts: det bästa först. Bonusarna läses men verkar inte än.",
+  "mood": {
+    "max": 100,
+    "seconds_per_point": 6,
+    "eat_at": 30,
+    "rest_seconds": 180
+  },
+  "food": [
+    { "good": "pannkakor", "mood": 60, "bonus": "fart", "percent": 10, "seconds": 180 },
+    { "good": "korv", "mood": 45 },
+    { "good": "knackebrod", "mood": 30 },
+    { "good": "abborre", "mood": 30 },
+    { "good": "kaffe", "mood": 20 },
+    { "good": "sylt", "mood": 15, "with": "pannkakor", "bonus": "anfall", "percent": 1, "seconds": 180 },
+    { "good": "svagdricka", "mood": 10, "bonus": "arbete", "percent": 10, "seconds": 180 }
+  ]
+}

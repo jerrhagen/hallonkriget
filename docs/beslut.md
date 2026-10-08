@@ -2,6 +2,20 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Mat, humör, bygdegården och lanthandeln
+
+- **Starten (väntar på Arons svar).** Designdokumentets start går inte ihop: varje arbetare kostar en kopp kaffe och ett verktyg i bygdegården, startförrådet har 2 kaffe och inga verktyg, och verktyg kommer bara från snickarboden eller lanthandeln, som båda behöver en utbildad arbetare. Tills Aron bestämt sig börjar matchen med sex arbetare utöver bärarna och hantlangarna (skogshuggare, sågare, vedhuggare, stenröjare, bonde, vattenbärare) och 2 verktyg i startförrådet. Allt står i `start_people` och `start_stock` i `buildings.json`.
+- På kafferepet äter man det bästa som finns först, en portion av varje sort, tills humöret är fullt (som värdshuset i KaM). Sylt räknas bara ihop med pannkakor. Med bara knäckebröd går en person från 30 till 60 och äter igen efter tre minuter, så en person äter ett knäckebröd var tredje minut.
+- Kaffet är spärrat på kafferepet från början, så att det inte äts upp innan bygdegården fått sitt. Spelaren kan häva spärren (`BlockGood`), som kommer att finnas för alla varor.
+- Arbetare äter mellan två omgångar, aldrig mitt i en, och går tillbaka till samma arbetsplats. Bärare äter när de lämnat det de bär. Finns ingen mat arbetar man vidare tills humöret tar slut.
+- Den som ger upp tappar det hen bär, vilar tre minuter i stugan och kommer tillbaka med fullt humör och samma yrke.
+- Bonusarna (pannkakor, sylt, svagdricka) står i `food.json` men verkar inte än. De kommer när köket och bryggstugan finns.
+- Bygdegården begär bara det kön behöver: kaffe eller surrogat för dem som väntar och ett verktyg i taget. Kön rymmer sex. Ingen utbildning börjar om alla sovplatser är tagna; en byggnad ger en sovplats om inget annat står (stugan 4, mangårdsbyggnaden 6, boden 10).
+- Lanthandeln gör ingenting förrän spelaren valt vad som ska köpas och med vad. Varje byte tar 20 sekunder. Den ska ligga intill landsvägen (diagonalt räknas).
+- Spelets klocka: en vecka per timme, matchen börjar en måndag. Söndagen är sista sjundedelen av varje timme.
+- Rosteriet är med i datan, eftersom bygdegården tar surrogat. Mjölkpallen kommer med korna.
+- Brödgården i testet behöver tre åkrar och två bagarstugor för att föda sina 19 personer. Byggordningen spelar roll: startförrådets sten räcker till fyra hus, och stenröjarboden måste vara ett av dem.
+
 ## 2026-10-08: Personer och leveranser i fas 1
 
 - 1,2 rutor per sekund är farten på upptrampad stig. På gräs går det hälften så fort, i skog en fjärdedel. Då hinner en bärare ungefär 3 leveranser per minut på en tät gård, som designdokumentet räknar med.
