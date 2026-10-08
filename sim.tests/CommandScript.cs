@@ -1,5 +1,6 @@
 using Hallonkriget.Sim.Commands;
 using Hallonkriget.Sim.Determinism;
+using Hallonkriget.Sim.Map;
 
 namespace Hallonkriget.Sim.Tests;
 
@@ -15,11 +16,12 @@ public static class CommandScript
         MapHeight: 96,
         Players: new[]
         {
-            new PlayerSetup(Faction.Torpet, IsComputer: false),
-            new PlayerSetup(Faction.Storgarden, IsComputer: false),
-            new PlayerSetup(Faction.Torpet, IsComputer: true),
+            new PlayerSetup(Faction.Torpet, IsComputer: false, Start: new TilePoint(10, 10)),
+            new PlayerSetup(Faction.Storgarden, IsComputer: false, Start: new TilePoint(80, 80)),
+            new PlayerSetup(Faction.Torpet, IsComputer: true, Start: new TilePoint(10, 80)),
             new PlayerSetup(Faction.Storgarden, IsComputer: true),
-        });
+        },
+        Data: TestData.Game);
 
     public static List<Command>[] Generate(ulong scriptSeed, int ticks, int players)
     {
@@ -35,10 +37,15 @@ public static class CommandScript
                 byte player = (byte)rng.Range(0, players);
                 int x = rng.Range(-4, 99);
                 int y = rng.Range(-4, 99);
-                if (rng.Chance(40))
+                int kind = rng.Range(0, 99);
+                if (kind < 30)
                     list.Add(new Command(t, player, CommandType.SpawnWalker, x, y));
-                else
+                else if (kind < 70)
                     list.Add(new Command(t, player, CommandType.MoveWalker, rng.Range(0, 400), x, y));
+                else if (kind < 90)
+                    list.Add(new Command(t, player, CommandType.PlaceBuilding, rng.Range(-1, 12), x, y));
+                else
+                    list.Add(new Command(t, player, CommandType.SelectRecipe, rng.Range(-1, 60), rng.Range(-2, 3)));
             }
             perTick[t] = list;
         }

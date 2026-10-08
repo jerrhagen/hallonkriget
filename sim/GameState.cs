@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Hallonkriget.Sim.Buildings;
 using Hallonkriget.Sim.Commands;
+using Hallonkriget.Sim.Data;
 using Hallonkriget.Sim.Determinism;
 using Hallonkriget.Sim.Map;
 
@@ -19,19 +21,25 @@ public sealed class GameState
 
     private readonly List<Player> _players = new();
     private readonly List<Walker> _walkers = new();
+    private readonly List<Building> _buildings = new();
     private int _nextWalkerId;
 
     public int TickCount { get; private set; }
     public Rng Rng { get; }
+    public GameData Data { get; }
     public GameMap Map { get; }
     public int MapWidth => Map.Width;
     public int MapHeight => Map.Height;
     public IReadOnlyList<Player> Players => _players;
     public IReadOnlyList<Walker> Walkers => _walkers;
 
-    private GameState(ulong seed, int mapWidth, int mapHeight)
+    /// <summary>Alla byggnader i den ordning de placerades. Id är platsen i listan.</summary>
+    public IReadOnlyList<Building> Buildings => _buildings;
+
+    private GameState(ulong seed, int mapWidth, int mapHeight, GameData data)
     {
         Rng = new Rng(seed);
+        Data = data;
         Map = new GameMap(mapWidth, mapHeight);
     }
 
@@ -40,11 +48,19 @@ public sealed class GameState
         if (setup.MapWidth <= 0 || setup.MapHeight <= 0) throw new ArgumentException("Kartan måste ha en storlek");
         if (setup.Players.Count is 0 or > 8) throw new ArgumentException("1–8 spelare");
 
-        var state = new GameState(setup.Seed, setup.MapWidth, setup.MapHeight);
+        var state = new GameState(setup.Seed, setup.MapWidth, setup.MapHeight, setup.Data ?? GameData.Empty);
         for (int i = 0; i < setup.Players.Count; i++)
         {
             var p = setup.Players[i];
             state._players.Add(new Player((byte)i, p.Faction, p.IsComputer));
+        }
+        for (int i = 0; i < setup.Players.Count; i++)
+        {
+            if (setup.Players[i].Start is not { } start) continue;
+            var def = state.StartBuildingFor(setup.Players[i].Faction);
+            if (!state.CanPlace((byte)i, def, start, ignoreBuildable: true))
+                throw new ArgumentException($"Spelare {i} kan inte börja på {start}");
+            state.AddBuilding((byte)i, def, start).CompleteAtOnce(def.StartStock);
         }
         return state;
     }
@@ -79,6 +95,9 @@ public sealed class GameState
             h.Add((byte)p.Faction);
             h.Add(p.IsComputer);
         }
+        h.Add(Data.Fingerprint);
+        h.Add(_buildings.Count);
+        foreach (var b in _buildings) b.AddToHash(ref h);
         h.Add(_nextWalkerId);
         h.Add(_walkers.Count);
         foreach (var w in _walkers) w.AddToHash(ref h);
@@ -101,6 +120,14 @@ public sealed class GameState
                     break;
                 case CommandType.MoveWalker:
                     MoveWalker(c.Player, c.A, c.B, c.C);
+                    break;
+                case CommandType.PlaceBuilding:
+                    if (c.A >= 0 && c.A < Data.Buildings.Count)
+                        TryPlaceBuilding(c.Player, Data.Buildings[c.A], new TilePoint(c.B, c.C));
+                    break;
+                case CommandType.SelectRecipe:
+                    if (c.A >= 0 && c.A < _buildings.Count && _buildings[c.A].Owner == c.Player)
+                        _buildings[c.A].SelectRecipe(c.B);
                     break;
             }
         }
@@ -125,6 +152,57 @@ public sealed class GameState
     }
 
     private bool InsideMap(int x, int y) => Map.Inside(new TilePoint(x, y));
+
+    private BuildingDef StartBuildingFor(Faction faction)
+    {
+        foreach (var b in Data.Buildings)
+            if (!b.Buildable && b.IsStorage && b.AllowedFor(faction) && b.Faction != FactionRule.Both) return b;
+        throw new ArgumentException($"Datan saknar startbyggnad för {faction}");
+    }
+
+    /// <summary>
+    /// Kan spelaren placera byggnaden här? Hela fotavtrycket ska vara glänta som ingen annan äger
+    /// och där inget står, och dörren ska gå att nå. Ingen byggnad får stå på en annans dörr.
+    /// </summary>
+    public bool CanPlace(byte player, BuildingDef def, TilePoint origin, bool ignoreBuildable = false)
+    {
+        if (player >= _players.Count || !def.AllowedFor(_players[player].Faction)) return false;
+        if (!def.Buildable && !ignoreBuildable) return false;
+
+        for (int y = origin.Y; y < origin.Y + def.Height; y++)
+        for (int x = origin.X; x < origin.X + def.Width; x++)
+        {
+            var p = new TilePoint(x, y);
+            if (!Map.Inside(p) || !TerrainRules.IsBuildable(Map.TerrainAt(p)) || Map.OccupantAt(p) != 0) return false;
+            if (Map.OwnerAt(p) != GameMap.NoOwner && Map.OwnerAt(p) != player) return false;
+            foreach (var other in _buildings)
+                if (other.Entrance == p) return false;
+        }
+
+        var door = Building.EntranceFor(def, origin);
+        if (!Map.Inside(door) || !Map.IsWalkable(door, MoveClass.Foot)) return false;
+        return true;
+    }
+
+    private void TryPlaceBuilding(byte player, BuildingDef def, TilePoint origin)
+    {
+        if (CanPlace(player, def, origin)) AddBuilding(player, def, origin);
+    }
+
+    private Building AddBuilding(byte player, BuildingDef def, TilePoint origin)
+    {
+        var building = new Building(_buildings.Count, def, player, origin, Data.Goods.Count);
+        _buildings.Add(building);
+        for (int y = origin.Y; y < origin.Y + def.Height; y++)
+        for (int x = origin.X; x < origin.X + def.Width; x++)
+        {
+            var p = new TilePoint(x, y);
+            if (Map.PathAt(p) != PathState.None) Map.SetPath(p, PathState.None);
+            Map.SetOccupant(p, building.Id + 1);
+            Map.SetOwner(p, player);
+        }
+        return building;
+    }
 
     private void SpawnWalker(byte owner, int tileX, int tileY)
     {
@@ -190,7 +268,10 @@ public sealed class GameState
     }
 
     // Stegen nedan fylls i under fas 1 och 3. Ordningen är fast och står i CLAUDE.md.
-    private void UpdateProduction() { }
+    private void UpdateProduction()
+    {
+        foreach (var b in _buildings) b.UpdateProduction(Map);
+    }
     private void MatchDeliveries() { }
     private void UpdateMood() { }
     private void ResolveCombat() { }

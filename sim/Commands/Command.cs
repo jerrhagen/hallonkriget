@@ -12,6 +12,12 @@ public enum CommandType : byte
     // Ersätts av riktiga kommandon (bygg, lägg stig, utbilda ...) från fas 1.
     SpawnWalker = 1,
     MoveWalker = 2,
+
+    /// <summary>Placera en byggplats. A: byggnadstyp (nummer i buildings.json), B och C: övre vänstra rutan.</summary>
+    PlaceBuilding = 3,
+
+    /// <summary>Välj recept. A: byggnadens id, B: receptets nummer, eller -1 för att turas om.</summary>
+    SelectRecipe = 4,
 }
 
 /// <summary>Ett kommando: vem, när, vad och upp till tre heltalsparametrar.</summary>

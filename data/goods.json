@@ -1,0 +1,221 @@
+{
+  "_kommentar": "Alla 54 varor i ordningen i docs/produktionskedjor.md. Ordningen ger varornas nummer i simuleringen: lägg nya varor sist.",
+  "goods": [
+    {
+      "id": "timmer",
+      "name": "Timmer"
+    },
+    {
+      "id": "brador",
+      "name": "Brädor"
+    },
+    {
+      "id": "ved",
+      "name": "Ved"
+    },
+    {
+      "id": "trakol",
+      "name": "Träkol"
+    },
+    {
+      "id": "sten",
+      "name": "Sten"
+    },
+    {
+      "id": "vatten",
+      "name": "Vatten"
+    },
+    {
+      "id": "skrot",
+      "name": "Skrot"
+    },
+    {
+      "id": "jarn",
+      "name": "Järn"
+    },
+    {
+      "id": "vete",
+      "name": "Vete"
+    },
+    {
+      "id": "rag",
+      "name": "Råg"
+    },
+    {
+      "id": "potatis",
+      "name": "Potatis"
+    },
+    {
+      "id": "ho",
+      "name": "Hö"
+    },
+    {
+      "id": "hallon",
+      "name": "Hallon"
+    },
+    {
+      "id": "kart",
+      "name": "Kårt"
+    },
+    {
+      "id": "honung",
+      "name": "Honung"
+    },
+    {
+      "id": "socker",
+      "name": "Socker"
+    },
+    {
+      "id": "agg",
+      "name": "Ägg"
+    },
+    {
+      "id": "hona",
+      "name": "Höna"
+    },
+    {
+      "id": "gas",
+      "name": "Gås"
+    },
+    {
+      "id": "gris",
+      "name": "Gris"
+    },
+    {
+      "id": "sugga",
+      "name": "Sugga"
+    },
+    {
+      "id": "mjolk",
+      "name": "Mjölk"
+    },
+    {
+      "id": "ull",
+      "name": "Ull"
+    },
+    {
+      "id": "skinn",
+      "name": "Skinn"
+    },
+    {
+      "id": "kott",
+      "name": "Kött"
+    },
+    {
+      "id": "abborre",
+      "name": "Abborre"
+    },
+    {
+      "id": "mjol",
+      "name": "Mjöl"
+    },
+    {
+      "id": "ragmjol",
+      "name": "Rågmjöl"
+    },
+    {
+      "id": "knackebrod",
+      "name": "Knäckebröd"
+    },
+    {
+      "id": "pannkakor",
+      "name": "Pannkakor"
+    },
+    {
+      "id": "hardkokta_agg",
+      "name": "Hårdkokta ägg"
+    },
+    {
+      "id": "smor",
+      "name": "Smör"
+    },
+    {
+      "id": "korv",
+      "name": "Korv"
+    },
+    {
+      "id": "sylt",
+      "name": "Sylt"
+    },
+    {
+      "id": "svagdricka",
+      "name": "Svagdricka"
+    },
+    {
+      "id": "surrogatkaffe",
+      "name": "Surrogatkaffe"
+    },
+    {
+      "id": "kaffe",
+      "name": "Kaffe"
+    },
+    {
+      "id": "verktyg",
+      "name": "Verktyg"
+    },
+    {
+      "id": "rafsa",
+      "name": "Räfsa"
+    },
+    {
+      "id": "hogaffel",
+      "name": "Högaffel"
+    },
+    {
+      "id": "tralans",
+      "name": "Trälans"
+    },
+    {
+      "id": "bricka",
+      "name": "Bricka"
+    },
+    {
+      "id": "slangbella",
+      "name": "Slangbella"
+    },
+    {
+      "id": "hjul",
+      "name": "Hjul"
+    },
+    {
+      "id": "kastrullock",
+      "name": "Kastrullock"
+    },
+    {
+      "id": "syfingerborgar",
+      "name": "Syfingerborgar"
+    },
+    {
+      "id": "garn",
+      "name": "Garn"
+    },
+    {
+      "id": "stickad_mossa",
+      "name": "Stickad mössa"
+    },
+    {
+      "id": "lovikkavantar",
+      "name": "Lovikkavantar"
+    },
+    {
+      "id": "lader",
+      "name": "Läder"
+    },
+    {
+      "id": "sadel",
+      "name": "Sadel"
+    },
+    {
+      "id": "salt",
+      "name": "Salt"
+    },
+    {
+      "id": "saltpatroner",
+      "name": "Saltpatroner"
+    },
+    {
+      "id": "bensin",
+      "name": "Bensin"
+    }
+  ]
+}

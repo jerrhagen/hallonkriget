@@ -1,0 +1,280 @@
+{
+  "_kommentar": "Byggnaderna i docs/produktionskedjor.md. Fas 1 har de som behövs för knäckebröd, plus stenröjaren för stenen. Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3.",
+  "buildings": [
+    {
+      "id": "stugan",
+      "name": "Stugan",
+      "size": [
+        3,
+        3
+      ],
+      "faction": "torpet",
+      "buildable": false,
+      "storage": 30,
+      "start_stock": {
+        "brador": 10,
+        "sten": 6,
+        "ved": 4,
+        "knackebrod": 6,
+        "kaffe": 2
+      }
+    },
+    {
+      "id": "mangardsbyggnaden",
+      "name": "Mangårdsbyggnaden",
+      "size": [
+        3,
+        3
+      ],
+      "faction": "storgarden",
+      "buildable": false,
+      "storage": 30,
+      "start_stock": {
+        "brador": 10,
+        "sten": 6,
+        "ved": 4,
+        "knackebrod": 6,
+        "kaffe": 2
+      }
+    },
+    {
+      "id": "boden",
+      "name": "Boden",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "storage": 200
+    },
+    {
+      "id": "skogshuggarkojan",
+      "name": "Skogshuggarkojan",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "skogshuggare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "gathers": {
+        "terrain": "forest",
+        "radius": 8
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "timmer": 1
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "sagboden",
+      "name": "Sågboden",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "sagare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "timmer": 1
+          },
+          "out": {
+            "brador": 2
+          },
+          "seconds": 25
+        }
+      ]
+    },
+    {
+      "id": "vedboden",
+      "name": "Vedboden",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "vedhuggare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {
+            "timmer": 1
+          },
+          "out": {
+            "ved": 3
+          },
+          "seconds": 20
+        }
+      ]
+    },
+    {
+      "id": "stenrojarboden",
+      "name": "Stenröjarboden",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "stenrojare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "gathers": {
+        "terrain": "stony",
+        "radius": 8
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "sten": 1
+          },
+          "seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "brunnen",
+      "name": "Brunnen",
+      "size": [
+        1,
+        1
+      ],
+      "faction": "both",
+      "worker": "vattenbarare",
+      "cost": {
+        "brador": 3,
+        "sten": 1
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "vatten": 1
+          },
+          "seconds": 15
+        }
+      ]
+    },
+    {
+      "id": "akern",
+      "name": "Åkern",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "bonde",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {},
+          "out": {
+            "vete": 1
+          },
+          "seconds": 40
+        },
+        {
+          "in": {},
+          "out": {
+            "rag": 1
+          },
+          "seconds": 40
+        },
+        {
+          "in": {},
+          "out": {
+            "potatis": 1
+          },
+          "seconds": 40
+        }
+      ]
+    },
+    {
+      "id": "kvarnen",
+      "name": "Kvarnen",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "mjolnare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "vete": 1
+          },
+          "out": {
+            "mjol": 1
+          },
+          "seconds": 20
+        },
+        {
+          "in": {
+            "rag": 1
+          },
+          "out": {
+            "ragmjol": 1
+          },
+          "seconds": 20
+        }
+      ]
+    },
+    {
+      "id": "bagarstugan",
+      "name": "Bagarstugan",
+      "size": [
+        2,
+        2
+      ],
+      "faction": "both",
+      "worker": "bagare",
+      "cost": {
+        "brador": 6,
+        "sten": 3
+      },
+      "recipes": [
+        {
+          "in": {
+            "ragmjol": 1,
+            "vatten": 1,
+            "ved": 1
+          },
+          "out": {
+            "knackebrod": 3
+          },
+          "seconds": 30
+        }
+      ]
+    }
+  ]
+}
