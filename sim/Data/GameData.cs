@@ -236,14 +236,18 @@ public sealed class GameData
     public IReadOnlyList<ProfessionDef> Professions { get; }
     public IReadOnlyList<UnitDef> Units { get; }
     public CombatRules Combat { get; }
+
+    /// <summary>Datorspelarens plan från data/ai/dator.json, eller null utan datorspelare.</summary>
+    public Ai.ComputerPlan? Computer { get; }
     public ulong Fingerprint { get; }
 
     public static readonly GameData Empty = new(Array.Empty<GoodDef>(), Array.Empty<BuildingDef>(),
         Array.Empty<FoodDef>(), MoodRules.Default, Array.Empty<ProfessionDef>(), Array.Empty<UnitDef>(), CombatRules.Default);
 
     private GameData(GoodDef[] goods, BuildingDef[] buildings, FoodDef[] foods, MoodRules mood, ProfessionDef[] professions,
-        UnitDef[] units, CombatRules combat)
+        UnitDef[] units, CombatRules combat, Ai.ComputerPlan? computer = null)
     {
+        Computer = computer;
         Goods = goods;
         Buildings = buildings;
         Foods = foods;
@@ -257,7 +261,8 @@ public sealed class GameData
     /// <summary>Läser alla datafiler med readFile("goods.json") och så vidare.</summary>
     public static GameData FromFiles(Func<string, string> readFile) => Parse(
         readFile("goods.json"), readFile("buildings.json"),
-        readFile("food.json"), readFile("professions.json"), readFile("trade.json"), readFile("units.json"));
+        readFile("food.json"), readFile("professions.json"), readFile("trade.json"), readFile("units.json"),
+        readFile("ai/dator.json"));
 
     public UnitDef Unit(string id)
     {
@@ -296,7 +301,8 @@ public sealed class GameData
     /// förklaring om något är fel.
     /// </summary>
     public static GameData Parse(string goodsJson, string buildingsJson,
-        string? foodJson = null, string? professionsJson = null, string? tradeJson = null, string? unitsJson = null)
+        string? foodJson = null, string? professionsJson = null, string? tradeJson = null, string? unitsJson = null,
+        string? computerJson = null)
     {
         var goods = new List<GoodDef>();
         using (var doc = JsonDocument.Parse(goodsJson))
@@ -544,8 +550,9 @@ public sealed class GameData
             var home = buildings.Find(x => x.Id == u.Fixed) ?? throw new GameDataException($"{u.Id}: okänd byggnad {u.Fixed}");
             home.FixedUnit = u.Index;
         }
+        var computer = computerJson is null ? null : Ai.ComputerPlan.Parse(computerJson, buildings, units);
         return new GameData(goods.ToArray(), buildings.ToArray(), foods.ToArray(), mood, professions.ToArray(),
-            units.ToArray(), combat);
+            units.ToArray(), combat, computer);
     }
 
     private static (List<UnitDef>, CombatRules) ParseUnits(string json, Func<string, string, int> good,
@@ -750,6 +757,8 @@ public sealed class GameData
         h.Add(Combat.BreakTicks);
         h.Add(Combat.NoCoffeeMood);
         h.Add(Combat.Tray);
+        h.Add(Computer is not null);
+        Computer?.AddToHash(ref h);
         h.Add(Units.Count);
         foreach (var u in Units)
         {

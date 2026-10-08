@@ -45,7 +45,7 @@ public class DeterminismTests
     // Ändrad när humör, kafferepet, bygdegården och lanthandeln kom in (fas 1), och när alla byggnaderna,
     // odlingsrutorna, terräng som tar slut och matens bonusar kom in (fas 2), och när logen, grupperna
     // och gubben, och gärdsgården, råttfällorna, segern och kafferasten kom in (fas 3).
-    private const ulong GoldenHash = 3908129808466377612UL;
+    private const ulong GoldenHash = 14458598040202427473UL;
 
     [Fact]
     public void ReplayThroughByteFormatGivesSameHash()

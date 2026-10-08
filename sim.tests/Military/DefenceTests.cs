@@ -103,8 +103,13 @@ public class DefenceTests
         Assert.Equal(0, mill.InputCount(farm.G("vete")));
         Assert.Equal(1, farm.State.Players[1].BuildingsTaken);
 
-        // När fienden har gått blir den ägarens igen.
+        // När fienden har gått och en egen soldat kommer blir den ägarens igen.
         farm.Command(CommandType.MoveGroup, men[0].Group, 35, 25, player: 1);
+        farm.Run(300);
+        Assert.True(mill.IsTaken);
+        var own = Soldier(farm, 0, "rafsbrigaden", 13, 10);
+        farm.Run(1);
+        farm.Command(CommandType.MoveGroup, own.Group, 13, 9, player: 0);
         farm.RunUntil(() => !mill.IsTaken, 1500, "kvarnen är fri");
     }
 

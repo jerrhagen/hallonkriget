@@ -14,6 +14,7 @@ public sealed class Player
     public byte Id { get; }
     public Faction Faction { get; }
     public bool IsComputer { get; }
+    public Difficulty Difficulty { get; }
 
     /// <summary>Hur många av varje vara spelarens byggnader har tillverkat under matchen.</summary>
     public int[] Produced { get; }
@@ -40,8 +41,9 @@ public sealed class Player
     /// <summary>Hur många figurer av varje enhet logen har gjort.</summary>
     public int[] Equipped { get; }
 
-    public Player(byte id, Faction faction, bool isComputer, int goodCount, int unitCount = 0)
+    public Player(byte id, Faction faction, bool isComputer, int goodCount, int unitCount = 0, Difficulty difficulty = Difficulty.Normal)
     {
+        Difficulty = difficulty;
         Equipped = new int[unitCount];
         Id = id;
         Faction = faction;
@@ -55,6 +57,7 @@ public sealed class Player
         h.Add(Id);
         h.Add((byte)Faction);
         h.Add(IsComputer);
+        h.Add((byte)Difficulty);
         h.AddSparse(Produced);
         h.AddSparse(Eaten);
         h.Add(GaveUp);

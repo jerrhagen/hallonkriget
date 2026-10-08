@@ -12,6 +12,13 @@ using Hallonkriget.Sim.People;
 //   dotnet run --project sim.cli -- [byggordning] [minuter] [frö]
 //   dotnet run --project sim.cli -- brodgarden 90
 //   dotnet run --project sim.cli -- brodgarden 10 --spela-in=sim.tests/Replays/brodgarden.hkr
+//   dotnet run --project sim.cli -- dator 1000 normal     (datorspelare mot datorspelare, se Tournament.cs)
+
+if (args.FirstOrDefault() == "dator")
+{
+    Tournament.Run(args[1..], FindDataDir());
+    return;
+}
 
 var positional = args.Where(a => !a.StartsWith("--")).ToArray();
 string orderId = positional.Length > 0 ? positional[0] : "brodgarden";

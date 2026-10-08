@@ -2,6 +2,17 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Datorspelaren och kartan grannarna (fas 3)
+
+- Datorspelaren står i `data/ai/dator.json`: en byggordning för båda lägren, svårighetsgraderna, armén och vilka yrken som kommer först. Den tänker en gång i sekunden och gör bara sådant en spelare kan göra.
+- Byggordningen placerar varje byggnad på närmaste lediga plats med en ruta fritt runt om (samlare nära sin terräng) och lägger stig till stugan. Högst en byggplats per tre bärare. Den väntar när två färdiga byggnader saknar arbetare, eller när maten står kvar i bagarstugorna medan borden är tomma. När sängarna nästan är slut byggs ett bod först.
+- Bygdegården: handlaren först (kaffet sparas åt honom medan lanthandeln byggs), sedan matens yrken (fiskare, mjölnare, bagare, bonde, vattenbärare), hälften av bärarna, övriga arbetare, rekryter och resten av bärarna (högst 20). En kopp kaffe sparas till nästa arbetare, och fyra till rasten när armén är halvstor. Lanthandeln turas om mellan verktyg och kaffe för ved.
+- Reflex 1 räknar maten på borden och den som ligger färdig i förråd och bagarstugor: under 10 utbildas inga rekryter.
+- Kaffedrängen äter själv ur brickan. Logen gör drängar först när det finns fem soldater per dräng.
+- Logen spärrar brädor och ved från början, så att den inte tömmer förråden på byggmaterial. Spelaren kan häva spärren när katapulten eller vedtraven ska utrustas.
+- Anfallsgränsen är sänkt till 10 (lätt), 12 (normal) och 15 (svår) soldater, mot designdokumentets 20 och 40. Med ekonomins takt får datorn sällan ihop mer än 15 soldater åt gången, eftersom soldaterna äter fortare än gården hinner baka. Aron avgör vid fasens kontrollfråga.
+- Kartan `grannarna` är 96 × 48 rutor, spegelvänd, med var sin tomt. Skog, sten, äng, vatten och landsväg ligger inom 15 rutor från gårdarna.
+
 ## 2026-10-08: Kafferasten och kaffedrängen (fas 3)
 
 - Kafferasten kommer var tionde minut i verklig tid (minut 10, 20, 30 ...) och varar en minut. Alla soldater i fält sätter sig där de står. Djuren, gubben och kaffedrängen dricker inget kaffe.
@@ -17,7 +28,7 @@ Beslut som tagits efter designdokumentet. Nyast överst.
 - Vedtraven kastar ett vedträ var 2:a sekund på närmaste fiende inom 5 rutor, så länge vedkastaren är där och det finns ved.
 - Hundkojan har sin hund från början. Hunden biter allt inom 2 rutor och skäller på höns och pysslingar. Alla kan slå på hunden; den som ger upp går hem och kommer tillbaka efter tre minuter. Den äter en korv när den har tappat minst 45. Torpet får en hundkoja (den lånade hunden), Storgården en till för varje hundgård.
 - Råttfällor: spelaren lägger ut, en hantlangare gillrar. Högst 10 per spelare.
-- En byggnad tas när en fiendesoldat står vid dörren i 20 sekunder och ingen egen soldat, vedtrave eller hund finns inom 4 rutor. Allt i lagren är borta. Byggnaden blir ägarens igen när ingen fiende har synts inom 4 rutor på 20 sekunder.
+- En byggnad tas när en fiendesoldat står vid dörren i 20 sekunder och ingen egen soldat, vedtrave eller hund finns inom 4 rutor. Allt i lagren är borta. Byggnaden blir ägarens igen när en egen soldat har stått inom 4 rutor i 20 sekunder utan att någon fiende syns där.
 - Segern: en spelare har förlorat när alla förråd (bodarna och stugan) är tagna och inga soldater finns kvar som inte är på väg hem. Gubben räknas som soldat.
 
 ## 2026-10-08: Logen, grupperna och striden (fas 3)

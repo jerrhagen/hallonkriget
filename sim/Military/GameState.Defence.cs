@@ -282,8 +282,8 @@ public sealed partial class GameState
 
     /// <summary>
     /// Var sekund: en fiendesoldat vid dörren och ingen försvarare inom fyra rutor räknar upp mot 20
-    /// sekunder, och då är byggnaden tagen. En tagen byggnad blir ägarens igen när ingen fiende har
-    /// synts vid den på 20 sekunder.
+    /// sekunder, och då är byggnaden tagen. En tagen byggnad blir ägarens igen när en egen soldat har
+    /// stått vid den i 20 sekunder utan att någon fiende synts.
     /// </summary>
     private void Captures()
     {
@@ -291,13 +291,13 @@ public sealed partial class GameState
         {
             if (b.Def.IsWall || b.Stage != BuildingStage.Done) continue;
             byte attacker = GameMap.NoOwner;
-            bool defended = false, enemyNear = false;
+            bool defended = false, enemyNear = false, ownNear = false;
             foreach (var q in _people)
             {
                 if (q.Role != PersonRole.Soldier || q.Job != PersonJob.Soldiering) continue;
                 int d = Chebyshev(q.Tile, b.Entrance);
                 if (d > CaptureRadius) continue;
-                if (q.Owner == b.Owner) defended = true;
+                if (q.Owner == b.Owner) defended = ownNear = true;
                 else
                 {
                     enemyNear = true;
@@ -308,7 +308,8 @@ public sealed partial class GameState
 
             if (b.IsTaken)
             {
-                b.CaptureTicks = enemyNear ? 0 : b.CaptureTicks + TicksPerSecond;
+                // Ägaren återtar den med en egen soldat vid dörren och ingen fiende i närheten.
+                b.CaptureTicks = enemyNear || !ownNear ? 0 : b.CaptureTicks + TicksPerSecond;
                 if (b.CaptureTicks >= Data.Combat.CaptureTicks)
                 {
                     b.TakenBy = GameMap.NoOwner;
