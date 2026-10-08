@@ -9,7 +9,11 @@
     "combat_hunger_percent": 200,
     "medal_after": 3,
     "capture_seconds": 20,
-    "logen_stock": 20
+    "logen_stock": 20,
+    "coffee_break_minutes": 10,
+    "coffee_break_seconds": 60,
+    "no_coffee_mood": 20,
+    "tray": 4
   },
   "units": [
     { "id": "rafsbrigaden", "name": "Räfsbrigaden", "faction": "both", "attack": 4, "defence": 1, "mood": 60, "speed": 10, "recruits": 1, "gear": { "rafsa": 1, "stickad_mossa": 1 } },

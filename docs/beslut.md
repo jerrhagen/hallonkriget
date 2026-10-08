@@ -2,6 +2,13 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Kafferasten och kaffedrängen (fas 3)
+
+- Kafferasten kommer var tionde minut i verklig tid (minut 10, 20, 30 ...) och varar en minut. Alla soldater i fält sätter sig där de står. Djuren, gubben och kaffedrängen dricker inget kaffe.
+- En soldat får sin kopp av en kaffedräng, eller hämtar den själv på ett eget kafferep inom 8 rutor om det finns kaffe på bordet (kaffet är spärrat där från början, så spelaren måste häva spärren). Den som inte har fått kaffe när rasten är slut tappar 20 humör, och gruppen står still en minut till.
+- Kaffedrängen hämtar kaffe och den bästa maten (utom sylt, som bara äts med pannkakor) i närmaste förråd, högst 4 av varje. Under rasten går han till närmaste soldat som väntar på kaffe, annars bjuder han hungriga soldater inom 20 rutor på mat. Han fyller inte på skott; den som har skjutit slut går själv till logen.
+- Rasten och straffet står i `units.json` (`coffee_break_minutes`, `coffee_break_seconds`, `no_coffee_mood`, `tray`).
+
 ## 2026-10-08: Försvar, belägring och seger (fas 3)
 
 - Gärdsgård (1 sten, 20 sekunder, hållfasthet 60) och staket (1 bräda, 10 sekunder, hållfasthet 30) byggs ruta för ruta som små byggplatser. De står i `buildings.json` med `wall`, men räknas inte till de 45 byggnaderna. Utflyttning av tomtgränsen väntar till kampanjen.

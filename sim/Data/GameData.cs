@@ -64,7 +64,8 @@ public sealed record FuelDef(int Good, int Ticks);
 
 /// <summary>Stridens regler från units.json, i tick där det är tid.</summary>
 public sealed record CombatRules(int StrikeTicks, int Sight, int GroupMax, int MaxShots, int SoldierHungerPercent,
-    int CombatHungerPercent, int MedalAfter, int CaptureTicks, int BarracksStock)
+    int CombatHungerPercent, int MedalAfter, int CaptureTicks, int BarracksStock,
+    int BreakEveryTicks = 6000, int BreakTicks = 600, int NoCoffeeMood = 20, int Tray = 4)
 {
     public static readonly CombatRules Default = new(20, 6, 20, 10, 150, 200, 3, 200, 20);
 }
@@ -556,7 +557,9 @@ public sealed class GameData
         var combat = new CombatRules(
             Rule("strike_seconds") * GameState.TicksPerSecond, Rule("sight"), Rule("group_max"), Rule("max_shots"),
             Rule("soldier_hunger_percent"), Rule("combat_hunger_percent"), Rule("medal_after"),
-            Rule("capture_seconds") * GameState.TicksPerSecond, Rule("logen_stock"));
+            Rule("capture_seconds") * GameState.TicksPerSecond, Rule("logen_stock"),
+            Rule("coffee_break_minutes") * 60 * GameState.TicksPerSecond, Rule("coffee_break_seconds") * GameState.TicksPerSecond,
+            Rule("no_coffee_mood"), Rule("tray"));
         if (combat.StrikeTicks <= 0 || combat.Sight <= 0 || combat.GroupMax <= 0 || combat.SoldierHungerPercent <= 0 || combat.CombatHungerPercent <= 0)
             throw new GameDataException("units.json: reglerna går inte ihop");
 
@@ -743,6 +746,10 @@ public sealed class GameData
         h.Add(Combat.MedalAfter);
         h.Add(Combat.CaptureTicks);
         h.Add(Combat.BarracksStock);
+        h.Add(Combat.BreakEveryTicks);
+        h.Add(Combat.BreakTicks);
+        h.Add(Combat.NoCoffeeMood);
+        h.Add(Combat.Tray);
         h.Add(Units.Count);
         foreach (var u in Units)
         {
