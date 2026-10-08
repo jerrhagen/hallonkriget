@@ -20,6 +20,8 @@ public static class IntMath
         return x;
     }
 
+    public static int Abs(int value) => value < 0 ? -value : value;
+
     public static int Clamp(int value, int min, int max) =>
         value < min ? min : value > max ? max : value;
 }

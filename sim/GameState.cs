@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Hallonkriget.Sim.Commands;
 using Hallonkriget.Sim.Determinism;
+using Hallonkriget.Sim.Map;
 
 namespace Hallonkriget.Sim;
 
@@ -22,16 +23,16 @@ public sealed class GameState
 
     public int TickCount { get; private set; }
     public Rng Rng { get; }
-    public int MapWidth { get; }
-    public int MapHeight { get; }
+    public GameMap Map { get; }
+    public int MapWidth => Map.Width;
+    public int MapHeight => Map.Height;
     public IReadOnlyList<Player> Players => _players;
     public IReadOnlyList<Walker> Walkers => _walkers;
 
     private GameState(ulong seed, int mapWidth, int mapHeight)
     {
         Rng = new Rng(seed);
-        MapWidth = mapWidth;
-        MapHeight = mapHeight;
+        Map = new GameMap(mapWidth, mapHeight);
     }
 
     public static GameState NewMatch(MatchSetup setup)
@@ -70,8 +71,7 @@ public sealed class GameState
         var h = new StateHasher();
         h.Add(TickCount);
         h.Add(Rng.State);
-        h.Add(MapWidth);
-        h.Add(MapHeight);
+        Map.AddToHash(ref h);
         h.Add(_players.Count);
         foreach (var p in _players)
         {
@@ -124,7 +124,7 @@ public sealed class GameState
         return arr;
     }
 
-    private bool InsideMap(int x, int y) => x >= 0 && y >= 0 && x < MapWidth && y < MapHeight;
+    private bool InsideMap(int x, int y) => Map.Inside(new TilePoint(x, y));
 
     private void SpawnWalker(byte owner, int tileX, int tileY)
     {
