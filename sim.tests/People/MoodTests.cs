@@ -117,7 +117,7 @@ public class MoodTests
     }
 
     [Fact]
-    public void CarrierThatGivesUpDropsTheGoodsAndReservationsBalance()
+    public void CarrierThatGivesUpTakesTheGoodsHomeAndReservationsBalance()
     {
         var farm = new Farm(width: 30, height: 20, start: new TilePoint(5, 5));
         var site = farm.Place("vedboden", 20, 12);
@@ -125,12 +125,18 @@ public class MoodTests
         var carrier = farm.State.People.First(p => p.Carrying >= 0);
         carrier.Mood = 1;
         carrier.MoodTimer = 1;
+        int good = carrier.Carrying;
+        int atHome = farm.Home.OutputCount(good);
         farm.Run(1);
-        Assert.Equal(-1, carrier.Carrying);
+        Assert.Equal(PersonJob.ToHome, carrier.Job);
         Assert.DoesNotContain(farm.State.Deliveries, d => d.Carrier == carrier.Id);
         foreach (var b in farm.State.Buildings)
         for (int g = 0; g < farm.Data.Goods.Count; g++)
             Assert.Equal(farm.State.Deliveries.Count(d => d.To == b.Id && d.Good == g), b.Incoming[g]);
+        // Varan följer med hem och läggs i stugan.
+        farm.RunUntil(() => carrier.Job == PersonJob.Resting, 600, "hemma");
+        Assert.Equal(-1, carrier.Carrying);
+        Assert.Equal(atHome + 1, farm.Home.OutputCount(good));
         // Bygget blir ändå klart: de andra bär det som behövs.
         farm.RunUntil(() => site.Stage == BuildingStage.Done, 5000, "vedboden byggd");
     }

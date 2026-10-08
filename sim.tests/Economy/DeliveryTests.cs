@@ -47,6 +47,7 @@ public class DeliveryTests
         var vedboden = farm.Place("vedboden", 12, 6);
         var bageri = farm.Place("bagarstugan", 16, 6);
         farm.RunUntil(() => vedboden.Stage == BuildingStage.Done && bageri.Stage == BuildingStage.Done, 6000, "båda byggda");
+        bageri.WorkerId = 999; // en bagare har tagit platsen, annars begär bagarstugan inget
 
         farm.RunUntil(() => bageri.InputCount(farm.G("ved")) == 4, 3000, "stugans ved i bagarstugan");
 

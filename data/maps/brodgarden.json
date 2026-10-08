@@ -1,0 +1,11 @@
+{
+  "_kommentar": "Övningskarta för fas 1: en gård med skog i sydväst, stenig mark i öster och landsvägen längs södra kanten. rect är [x0, y0, x1, y1], hörnen inräknade.",
+  "id": "brodgarden",
+  "size": [44, 26],
+  "starts": [[5, 5]],
+  "terrain": [
+    { "terrain": "forest", "rect": [1, 14, 9, 19] },
+    { "terrain": "stony", "rect": [33, 14, 37, 16] },
+    { "terrain": "road", "rect": [0, 25, 43, 25] }
+  ]
+}

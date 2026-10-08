@@ -2,13 +2,22 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: sim.cli och kontrollfrågan för fas 1
+
+- `dotnet run --project sim.cli` spelar upp en byggordning från `data/ai/` på dess karta i `data/maps/` och skriver produktion per minut. Kontrollfrågan räknas på de sista 30 minuterna: knäckebröd i sex fönster om 5 minuter, inget fönster under hälften av det bästa, och ingen som ger upp av hunger.
+- Byggordningen `brodgarden` utbildar sitt folk i bygdegården och köper verktyg och kaffe för ved i lanthandeln, omväxlande. Efter en timme bakar gården 27–39 knäckebröd per 5 minuter, och ingen leverans tar mer än en minut.
+- Den som ger upp tar varan med sig hem och lägger den i stugan, i stället för att den försvinner. Varor som ligger kvar på marken kommer med pysslingarna som tappar dem.
+- En byggnad som ingen arbetare har tagit begär inga varor. Annars samlades veden i bagarstugorna innan det fanns en bagare, och lanthandeln fick ingen ved att köpa verktyg för.
+- Ett steg i en byggordning väntar på sin minut, på att en byggnad är färdig eller på att något är tillverkat, och håller kvar stegen efter sig. Det är så datorspelarens byggordningar kommer att fungera i fas 3.
+- Matchens början är hård: ingen mat kommer på bordet förrän kafferepet står, och det kan inte byggas före sågboden med startförrådets brädor. Alla ger upp en gång runt minut 10. Det följer av designdokumentets siffror och får prövas när spelet går att spela.
+
 ## 2026-10-08: Mat, humör, bygdegården och lanthandeln
 
-- **Starten (väntar på Arons svar).** Designdokumentets start går inte ihop: varje arbetare kostar en kopp kaffe och ett verktyg i bygdegården, startförrådet har 2 kaffe och inga verktyg, och verktyg kommer bara från snickarboden eller lanthandeln, som båda behöver en utbildad arbetare. Tills Aron bestämt sig börjar matchen med sex arbetare utöver bärarna och hantlangarna (skogshuggare, sågare, vedhuggare, stenröjare, bonde, vattenbärare) och 2 verktyg i startförrådet. Allt står i `start_people` och `start_stock` i `buildings.json`.
+- **Starten (Aron valde den 8 oktober).** Designdokumentets start går inte ihop: varje arbetare kostar en kopp kaffe och ett verktyg i bygdegården, startförrådet har 2 kaffe och inga verktyg, och verktyg kommer bara från snickarboden eller lanthandeln, som båda behöver en utbildad arbetare. Aron valde att matchen börjar med sex arbetare utöver bärarna och hantlangarna (skogshuggare, sågare, vedhuggare, stenröjare, bonde, vattenbärare) och 2 verktyg i startförrådet. Bygdegården byggs vid minut 5–12 som i tidslinjen. Allt står i `start_people` och `start_stock` i `buildings.json`.
 - På kafferepet äter man det bästa som finns först, en portion av varje sort, tills humöret är fullt (som värdshuset i KaM). Sylt räknas bara ihop med pannkakor. Med bara knäckebröd går en person från 30 till 60 och äter igen efter tre minuter, så en person äter ett knäckebröd var tredje minut.
 - Kaffet är spärrat på kafferepet från början, så att det inte äts upp innan bygdegården fått sitt. Spelaren kan häva spärren (`BlockGood`), som kommer att finnas för alla varor.
 - Arbetare äter mellan två omgångar, aldrig mitt i en, och går tillbaka till samma arbetsplats. Bärare äter när de lämnat det de bär. Finns ingen mat arbetar man vidare tills humöret tar slut.
-- Den som ger upp tappar det hen bär, vilar tre minuter i stugan och kommer tillbaka med fullt humör och samma yrke.
+- Den som ger upp vilar tre minuter i stugan och kommer tillbaka med fullt humör och samma yrke.
 - Bonusarna (pannkakor, sylt, svagdricka) står i `food.json` men verkar inte än. De kommer när köket och bryggstugan finns.
 - Bygdegården begär bara det kön behöver: kaffe eller surrogat för dem som väntar och ett verktyg i taget. Kön rymmer sex. Ingen utbildning börjar om alla sovplatser är tagna; en byggnad ger en sovplats om inget annat står (stugan 4, mangårdsbyggnaden 6, boden 10).
 - Lanthandeln gör ingenting förrän spelaren valt vad som ska köpas och med vad. Varje byte tar 20 sekunder. Den ska ligga intill landsvägen (diagonalt räknas).

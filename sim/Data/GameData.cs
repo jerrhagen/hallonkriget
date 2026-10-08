@@ -395,7 +395,7 @@ public sealed class GameData
         _ => throw new GameDataException($"{where}: okänt läger {name}"),
     };
 
-    private static Terrain ParseTerrain(string name, string where) => name switch
+    internal static Terrain ParseTerrain(string name, string where) => name switch
     {
         "clearing" => Terrain.Clearing,
         "stony" => Terrain.Stony,
