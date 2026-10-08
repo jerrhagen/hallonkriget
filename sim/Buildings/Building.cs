@@ -11,6 +11,9 @@ public enum BuildingStage : byte
     /// <summary>Byggplats: väntar på material och hantlangarnas arbete.</summary>
     Construction,
     Done,
+
+    /// <summary>Gärdsgård, staket eller vedtrave som har slagits sönder. Rutan går att gå på igen.</summary>
+    Ruined,
 }
 
 /// <summary>
@@ -57,8 +60,19 @@ public sealed class Building
     /// <summary>Spelaren som har tagit byggnaden, eller 255. En tagen byggnad står tom tills fienden har gått.</summary>
     public byte TakenBy { get; internal set; } = Map.GameMap.NoOwner;
 
-    /// <summary>Hur länge fienden har stått vid dörren utan motstånd.</summary>
+    /// <summary>Hur länge fienden har stått vid dörren utan motstånd, eller (för en tagen byggnad) hur länge den varit fri.</summary>
     public int CaptureTicks { get; internal set; }
+
+    /// <summary>Skada på gärdsgården, staketet, vedtraven eller hunden i kojan. Noll är helt.</summary>
+    public int Damage { get; internal set; }
+
+    /// <summary>Tick kvar till vedtraven eller hunden slår nästa gång.</summary>
+    public int StrikeTimer { get; internal set; }
+
+    /// <summary>Hunden har gett upp och kommer tillbaka det här ticket. Noll när den är hemma.</summary>
+    public int AwayUntil { get; internal set; }
+
+    public bool IsTaken => TakenBy != Map.GameMap.NoOwner;
 
     /// <summary>Varor på väg hit med bärare, per vara. Räknas av när de kommer fram.</summary>
     internal readonly int[] Incoming;
@@ -102,8 +116,9 @@ public sealed class Building
         SelectedRecipe = def.DefaultRecipe;
     }
 
+    /// <summary>Dörren. En gärdsgård har ingen: materialet lämnas på rutan.</summary>
     public static TilePoint EntranceFor(BuildingDef def, TilePoint origin) =>
-        new(origin.X + def.Width / 2, origin.Y + def.Height);
+        def.IsWall ? origin : new(origin.X + def.Width / 2, origin.Y + def.Height);
 
     public bool Covers(TilePoint p) =>
         p.X >= Origin.X && p.Y >= Origin.Y && p.X < Origin.X + Def.Width && p.Y < Origin.Y + Def.Height;
@@ -163,6 +178,21 @@ public sealed class Building
         return true;
     }
 
+    /// <summary>Slagen sönder: står kvar som en ruin.</summary>
+    internal void Ruin() => Stage = BuildingStage.Ruined;
+
+    /// <summary>Tagen av fienden: allt i lagren hamnar på marken och är borta, och det som pågår avbryts.</summary>
+    internal void Plunder(byte by)
+    {
+        TakenBy = by;
+        CaptureTicks = 0;
+        Array.Clear(_input);
+        Array.Clear(_output);
+        CurrentRecipe = -1;
+        HasWorker = false;
+        WorkerId = -1;
+    }
+
     internal void CompleteAtOnce(GoodAmount[] stock)
     {
         Stage = BuildingStage.Done;
@@ -185,7 +215,7 @@ public sealed class Building
     /// <summary>Hur många till av varan byggnaden kan ta emot just nu.</summary>
     public int InputSpace(int good)
     {
-        if (Stage != BuildingStage.Done) return 0;
+        if (Stage != BuildingStage.Done || IsTaken) return 0;
         if (Def.IsStorage) return Def.Storage - StoredTotal;
         if (!Uses(good)) return 0;
         if (Def.Table > 0) return Def.Table - InputTotal;
@@ -437,6 +467,9 @@ public sealed class Building
         h.Add(Gathered);
         h.Add(TakenBy);
         h.Add(CaptureTicks);
+        h.Add(Damage);
+        h.Add(StrikeTimer);
+        h.Add(AwayUntil);
         foreach (int d in _delivered) h.Add(d);
         h.AddSparse(_input);
         h.AddSparse(_output);

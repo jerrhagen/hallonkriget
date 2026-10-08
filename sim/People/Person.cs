@@ -48,6 +48,15 @@ public enum PersonJob : byte
 
     /// <summary>Soldaten är i fält med sin grupp.</summary>
     Soldiering,
+
+    /// <summary>Hantlangaren går till en skadad gärdsgård eller vedtrave.</summary>
+    ToRepair,
+
+    /// <summary>Hantlangaren lagar, 10 hållfasthet per 10 sekunder.</summary>
+    Repairing,
+
+    /// <summary>Hantlangaren går och gillrar en råttfälla på TargetTile.</summary>
+    ToTrap,
 }
 
 /// <summary>
@@ -90,6 +99,9 @@ public sealed class Person
 
     /// <summary>Fienden soldaten slåss mot just nu: personens id, eller -1.</summary>
     public int Foe { get; internal set; } = -1;
+
+    /// <summary>Fiendebyggnaden soldaten slår på (gärdsgård, vedtrave, hundkoja), eller -1.</summary>
+    public int FoeBuilding { get; internal set; } = -1;
 
     public TilePoint Tile { get; internal set; }
     public TilePoint From { get; internal set; }
@@ -182,6 +194,7 @@ public sealed class Person
         h.Add(Medal);
         h.Add(Fuel);
         h.Add(Foe);
+        h.Add(FoeBuilding);
         h.Add(PathIndex);
         h.Add(Path.Count);
         foreach (var p in Path)

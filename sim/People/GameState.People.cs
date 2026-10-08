@@ -171,7 +171,7 @@ public sealed partial class GameState
     /// <summary>Personen står still: antingen framme, mitt i ett arbete eller ledig.</summary>
     private void Act(Person p)
     {
-        if (Hungry(p) && p.Job is PersonJob.Idle or PersonJob.Building or PersonJob.Treading && TryGoEat(p)) return;
+        if (Hungry(p) && p.Job is PersonJob.Idle or PersonJob.Building or PersonJob.Treading or PersonJob.Repairing && TryGoEat(p)) return;
 
         switch (p.Job)
         {
@@ -234,6 +234,19 @@ public sealed partial class GameState
                 ArriveAtPickup(p);
                 break;
 
+            case PersonJob.ToRepair:
+                p.Job = PersonJob.Repairing;
+                p.Timer = 0;
+                break;
+
+            case PersonJob.Repairing:
+                Repair(p);
+                break;
+
+            case PersonJob.ToTrap:
+                ArmTrap(p);
+                break;
+
             case PersonJob.ToDropoff:
                 ArriveAtDropoff(p);
                 break;
@@ -287,6 +300,7 @@ public sealed partial class GameState
             p.Target = bestSite.Id;
             return;
         }
+        if (FindRepair(p) || FindTrapToLay(p)) return;
 
         int bestTile = -1;
         best = int.MaxValue;
@@ -323,7 +337,7 @@ public sealed partial class GameState
                 bestWork = b;
                 break;
             }
-            if (b.Owner != p.Owner || b.Stage != BuildingStage.Done || b.WorkerId >= 0 || b.Def.Worker != p.Profession) continue;
+            if (b.Owner != p.Owner || b.Stage != BuildingStage.Done || b.IsTaken || b.WorkerId >= 0 || b.Def.Worker != p.Profession) continue;
             int d = Distance(p.Tile, b.Entrance);
             if (d < best)
             {

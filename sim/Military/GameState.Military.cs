@@ -132,7 +132,7 @@ public sealed partial class GameState
         int bestDistance = int.MaxValue;
         foreach (var b in _buildings)
         {
-            if (b.Owner != p.Owner || !b.Def.Barracks || b.Stage != BuildingStage.Done) continue;
+            if (b.Owner != p.Owner || !b.Def.Barracks || b.Stage != BuildingStage.Done || b.IsTaken) continue;
             int d = Distance(p.Tile, b.Entrance);
             if (d < bestDistance) (bestDistance, best) = (d, b);
         }
@@ -413,6 +413,14 @@ public sealed partial class GameState
             }
         }
 
+        p.FoeBuilding = -1;
+        if (BuildingFoeInReach(p, u) is { } wall)
+        {
+            p.FoeBuilding = wall.Id;
+            StopWalking(p);
+            return;
+        }
+
         if (g.StillUntil > TickCount || !canMove)
         {
             StopWalking(p);
@@ -433,7 +441,9 @@ public sealed partial class GameState
             StopWalking(p);
             return;
         }
-        if (PathGoal(p) != slot && !WalkTo(p, slot))
+        // På väg mot en gärdsgård som står i vägen: fortsätt dit.
+        bool towardWall = PathGoal(p) is { } goal && Map.OccupantAt(goal) > 0 && CanHit(p, u, _buildings[Map.OccupantAt(goal) - 1]);
+        if (PathGoal(p) != slot && !towardWall && !WalkTo(p, slot) && !WalkToNearestWall(p, u))
         {
             StopWalking(p);
             return;

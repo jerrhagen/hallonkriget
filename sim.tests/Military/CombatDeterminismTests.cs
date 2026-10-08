@@ -39,5 +39,5 @@ public class CombatDeterminismTests
     [Fact]
     public void BattleHashMatchesRecordedValueOnEveryPlatform() => Assert.Equal(GoldenHash, Battle());
 
-    private const ulong GoldenHash = 11308907501305584451UL;
+    private const ulong GoldenHash = 9713998574374209831UL;
 }

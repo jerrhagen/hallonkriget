@@ -57,6 +57,9 @@ public enum CommandType : byte
 
     /// <summary>Stanna där gruppen står. A: gruppen.</summary>
     HaltGroup = 17,
+
+    /// <summary>Lägg ut en råttfälla. A och B: rutan. En hantlangare gillrar den.</summary>
+    PlaceTrap = 18,
 }
 
 /// <summary>Ett kommando: vem, när, vad och upp till tre heltalsparametrar.</summary>
