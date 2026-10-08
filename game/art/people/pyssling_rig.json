@@ -1,0 +1,58 @@
+{
+  "size": [
+    96,
+    96
+  ],
+  "feet": [
+    48.0,
+    90.0
+  ],
+  "order": [
+    "arm_bak",
+    "ben_bak",
+    "agg",
+    "kropp",
+    "huvud",
+    "ben_fram",
+    "arm_fram"
+  ],
+  "pivots": {
+    "ben_bak": [
+      46.0,
+      72.0
+    ],
+    "ben_fram": [
+      50.0,
+      72.0
+    ],
+    "kropp": [
+      48.0,
+      72.0
+    ],
+    "huvud": [
+      50.0,
+      52.0
+    ],
+    "arm_bak": [
+      47.0,
+      56.0
+    ],
+    "arm_fram": [
+      52.0,
+      56.0
+    ],
+    "agg": [
+      40.0,
+      58.0
+    ]
+  },
+  "parent": {
+    "ben_bak": null,
+    "ben_fram": null,
+    "kropp": null,
+    "huvud": "kropp",
+    "arm_bak": "kropp",
+    "arm_fram": "kropp",
+    "agg": "kropp"
+  }
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Simuleringskärnan. Inga paket- eller projektreferenser: kontrolleras av ArchitectureTests. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Hallonkriget.Sim</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,15 @@
+<Project Sdk="Godot.NET.Sdk/4.4.1">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>Hallonkriget.Game</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Spelet läser simuleringskärnan; kärnan vet ingenting om spelet. -->
+  <ItemGroup>
+    <ProjectReference Include="..\sim\Hallonkriget.Sim.csproj" />
+  </ItemGroup>
+
+</Project>

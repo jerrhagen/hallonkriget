@@ -1,0 +1,38 @@
+name: Tester
+
+# Repot är publikt, så Actions-minuterna är gratis. Ändå:
+# - en ny push avbryter en körning som inte hunnit klart på samma gren
+# - ändringar som bara rör grafik eller dokument kör inga tester alls
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', 'art/**', 'game/art/**', '**/*.md']
+  pull_request:
+    paths-ignore: ['docs/**', 'art/**', 'game/art/**', '**/*.md']
+  workflow_dispatch:
+
+concurrency:
+  group: tester-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test --configuration Release
+      # Spelets C#-kod mot simuleringen. Godot själv behövs inte för det.
+      - run: dotnet build game/Hallonkriget.csproj --configuration Release
+
+  windows:
+    # Determinismtestet jämför mot en inskriven kontrollsumma, så det ska vara grönt här också.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test --configuration Release
