@@ -1,31 +1,43 @@
 name: Tester
 
+# Snålt med Actions-minuter: repot är privat, och varje jobb avrundas uppåt till hel minut
+# (Windows räknas dubbelt). Därför:
+# - pull requests kör bara Linux-jobbet, en minut
+# - Windows-jobbet, som jämför determinismen mellan plattformar, körs vid push till main
+#   eller för hand (Actions > Tester > Run workflow)
+# - en ny push avbryter en körning som inte hunnit klart på samma gren
+# - ändringar som bara rör grafik eller dokument kör inga tester alls
 on:
   push:
     branches: [main]
+    paths-ignore: ['docs/**', 'art/**', 'game/art/**', '**/*.md']
   pull_request:
+    paths-ignore: ['docs/**', 'art/**', 'game/art/**', '**/*.md']
+  workflow_dispatch:
+
+concurrency:
+  group: tester-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  sim:
-    # Determinismtestet jämför mot en inskriven kontrollsumma, så det ska vara grönt på båda.
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-      - run: dotnet test --configuration Release
-
-  spel:
-    # Bygger Godot-projektets C#-kod mot simuleringen. Godot själv behövs inte för det.
+  linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+      - run: dotnet test --configuration Release
+      # Spelets C#-kod mot simuleringen. Godot själv behövs inte för det.
       - run: dotnet build game/Hallonkriget.csproj --configuration Release
+
+  windows:
+    # Determinismtestet jämför mot en inskriven kontrollsumma, så det ska vara grönt här också.
+    if: github.event_name != 'pull_request'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test --configuration Release

@@ -2,6 +2,10 @@
 
 Beslut som tagits efter designdokumentet. Nyast överst.
 
+## 2026-10-08: Snålare CI
+
+- Repot är privat och Actions-minuterna är få. Pull requests kör bara Linux (tester och spelbygge, en minut). Windows-jämförelsen av determinismen körs vid push till main och för hand. Ändringar som bara rör grafik eller dokument kör inga tester.
+
 ## 2026-10-08: Stilprovet
 
 - Kontrollfrågan för fas 0 är besvarad ja: Aron tycker att stilprovet "ser fint ut". Stilen gäller, fas 1 börjar.
