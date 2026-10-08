@@ -411,15 +411,15 @@ public sealed class Building
         h.Add(Training);
         h.Add(_queue.Count);
         foreach (var q in _queue) h.Add(q.Index);
-        foreach (bool b in _blocked) h.Add(b);
+        h.AddSparse(_blocked);
         h.Add(SelectedRecipe);
         h.Add(CurrentRecipe);
         h.Add(CycleTicksLeft);
         h.Add(_nextAutoRecipe);
         foreach (int d in _delivered) h.Add(d);
-        foreach (int c in _input) h.Add(c);
-        foreach (int c in _output) h.Add(c);
-        foreach (int c in Incoming) h.Add(c);
-        foreach (int c in Outgoing) h.Add(c);
+        h.AddSparse(_input);
+        h.AddSparse(_output);
+        h.AddSparse(Incoming);
+        h.AddSparse(Outgoing);
     }
 }

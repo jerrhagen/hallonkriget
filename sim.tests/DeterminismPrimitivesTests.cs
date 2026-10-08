@@ -94,3 +94,22 @@ public class CommandCodecTests
         Assert.InRange(bytes.Length - 1, 5, 16);
     }
 }
+
+public class StateHasherTests
+{
+    private static ulong Sparse(params int[] values)
+    {
+        var h = new StateHasher();
+        h.AddSparse(values);
+        return h.Value;
+    }
+
+    [Fact]
+    public void SparseArraysDifferByPositionValueAndLength()
+    {
+        Assert.Equal(Sparse(0, 3, 0), Sparse(0, 3, 0));
+        Assert.NotEqual(Sparse(3, 0, 0), Sparse(0, 3, 0));
+        Assert.NotEqual(Sparse(0, 3, 0), Sparse(0, 4, 0));
+        Assert.NotEqual(Sparse(0, 0), Sparse(0, 0, 0));
+    }
+}

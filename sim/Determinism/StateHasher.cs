@@ -28,6 +28,28 @@ public struct StateHasher
         _hash *= Prime;
     }
 
+    /// <summary>
+    /// En array som mest innehåller nollor (lager per vara): bara platserna som inte är noll, och
+    /// sedan längden. Samma innehåll ger samma bidrag, och tomma lager kostar nästan ingenting.
+    /// </summary>
+    public void AddSparse(int[] values)
+    {
+        for (int i = 0; i < values.Length; i++)
+        {
+            if (values[i] == 0) continue;
+            Add(i);
+            Add(values[i]);
+        }
+        Add(values.Length);
+    }
+
+    public void AddSparse(bool[] values)
+    {
+        for (int i = 0; i < values.Length; i++)
+            if (values[i]) Add(i);
+        Add(values.Length);
+    }
+
     public void Add(long value) => Add(unchecked((ulong)value));
 
     public void Add(ulong value)

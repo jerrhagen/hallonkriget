@@ -43,7 +43,7 @@ public class DeterminismTests
     }
 
     // Ändrad när humör, kafferepet, bygdegården och lanthandeln kom in i tillståndet och manuset (fas 1).
-    private const ulong GoldenHash = 6150603062313261530UL;
+    private const ulong GoldenHash = 15473787137003163390UL;
 
     [Fact]
     public void ReplayThroughByteFormatGivesSameHash()

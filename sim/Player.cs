@@ -34,7 +34,7 @@ public sealed class Player
         h.Add(Id);
         h.Add((byte)Faction);
         h.Add(IsComputer);
-        foreach (int n in Produced) h.Add(n);
+        h.AddSparse(Produced);
         h.Add(GaveUp);
     }
 }
