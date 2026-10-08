@@ -55,5 +55,14 @@
   "hallon": "#b8324a",
   "kart": "#9aab4a",
   "grus": "#bfa77f",
-  "plojd": "#9b7a52"
+  "plojd": "#9b7a52",
+
+  "katt_gra": "#9a958b",
+  "katt_rand": "#5f5a52",
+  "katt_vit": "#f1ece0",
+  "hund_brun": "#9a6a3e",
+  "hund_mork": "#5e3d22",
+  "halsband": "#a8352b",
+  "nos": "#3a2f2a",
+  "ram": "#d9c9a3"
 }

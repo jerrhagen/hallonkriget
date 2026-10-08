@@ -28,6 +28,7 @@ public partial class Gard : Node2D
     private WorldView _world = null!;
     private Camera2D _camera = null!;
     private Hud _hud = null!;
+    private AdvisorCorner _advisor = new() { Name = "Radgivare" };
     private CanvasLayer _paper = null!;
     private Dictionary<string, string> _args = new();
     private string? _screenshot;
@@ -47,6 +48,7 @@ public partial class Gard : Node2D
         _match = new LocalMatch(data, GameFiles.LoadMap(mapId), 1958_07_14UL, faction);
         if (_args.TryGetValue("byggordning", out var order))
             _match.Autopilot = new Hallonkriget.Sim.Ai.BuildOrderPlayer(GameFiles.LoadBuildOrder(order, data), 0);
+        _advisor.Attach(_match);
         if (_args.TryGetValue("spola", out var minutes))
             _match.FastForward((int)(float.Parse(minutes, CultureInfo.InvariantCulture) * 60 * GameState.TicksPerSecond));
 
@@ -70,6 +72,7 @@ public partial class Gard : Node2D
         _hud = new Hud { Name = "Hud" };
         AddChild(_hud);
         _hud.Attach(_match, _world);
+        AddChild(_advisor);
         _hud.SaveRequested = Save;
         _hud.LoadRequested = Load;
         if (_args.TryGetValue("valj", out var sel))
@@ -95,6 +98,7 @@ public partial class Gard : Node2D
         _match = match;
         _world.Attach(match);
         _hud.Attach(match, _world);
+        _advisor.Attach(match);
     }
 
     private static string QuickSave => System.IO.Path.Combine(GameFiles.SaveDir, "snabbspar.hkr");

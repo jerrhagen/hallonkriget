@@ -37,6 +37,7 @@ ASSETS = [
     ("terrain", "terrain.terrang"),
     ("terrain", "terrain.stigar"),
     ("ui", "ui.papper"),
+    ("ui", "ui.radgivare"),
 ]
 
 # Rutor läggs dessutom ihop till en atlas per terräng, för Godots TileSet.
