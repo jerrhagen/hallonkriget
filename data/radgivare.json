@@ -1,0 +1,123 @@
+{
+  "_om": "Sixten (Torpet) och Major (Storgården) i hörnet. Varningarna är alltid rätt, pratet sällan. {antal}, {byggnad}, {yrke} och {vara} byts ut.",
+  "sixten": {
+    "namn": "Sixten",
+    "varningar": {
+      "inget_kafferep": [
+        "Folk är hungriga och det finns inget kafferep att gå till. Jag nämner det bara.",
+        "Ingen har byggt något kafferep. Jag har själv ätit, så för min del går det bra."
+      ],
+      "inget_pa_bordet": [
+        "Det står ingenting på bordet i kafferepet. Inte en smula.",
+        "Kafferepet är dukat med ingenting. Folk går dit och tittar."
+      ],
+      "svalt": [
+        "{antal} av vårt folk är så hungriga att de snart lägger sig.",
+        "{antal} går omkring och ser ut som om de tänkte på pannkakor. Det gör de."
+      ],
+      "gav_upp": [
+        "{antal} gav upp och gick hem för att lägga sig. Det var hungern.",
+        "Där gick {antal} hem. Ingen mat, inget arbete. Så är det."
+      ],
+      "lite_kaffe_lordag": [
+        "Vi har {antal} kaffe kvar och det är lördag. Jag säger inget mer.",
+        "Lördag, och {antal} kaffe i förrådet. I morgon har lanthandeln stängt."
+      ],
+      "ingen_arbetare": [
+        "{byggnad} står färdig, men ingen {yrke} finns. Bygdegården kan utbilda en.",
+        "{byggnad} väntar på en {yrke}. Den kommer inte av sig själv."
+      ],
+      "inga_barare": [
+        "Vi har inga bärare. Varorna ligger där de ligger.",
+        "Ingen bär något. Jag bär inget heller, jag är en katt."
+      ],
+      "bararna_hinner_inte": [
+        "Bärarna springer hela tiden, ingen står still. Det behövs fler.",
+        "Varje bärare har något i famnen. Fler bärare."
+      ],
+      "forradet_fullt": [
+        "{byggnad} är full. Det går inte att få in något mer.",
+        "Det ryms inget mer i {byggnad}. Bygg en bod till."
+      ],
+      "inga_sangar": [
+        "Alla sängar är tagna. Ingen ny kan utbildas förrän det finns fler.",
+        "Det finns ingenstans att sova för en till. Stugan och bodarna är fulla."
+      ]
+    },
+    "prat": [
+      "Det blir regn i morgon. Eller inte.",
+      "Om man ställer kvarnen närmare åkern behöver mjölet gå kortare. Jag har tänkt på det länge.",
+      "Hönsen tittar på mig. Jag tittar tillbaka.",
+      "Man ska aldrig lita på en hund som äter sylt.",
+      "Ett bra råd: bygg fler kafferep. Ett dåligt råd: bygg bara kafferep.",
+      "Stigarna blir bättre ju mer man går på dem. Det gäller inte mig.",
+      "Algot säger att man inte kan äta knäckebröd varje dag. Algot har fel.",
+      "Pannkakor gör folk snabbare. Sylt gör dem argare. Jag vet inte vad som gör mig något.",
+      "Holger på Storgården har en traktor. Vi har en skottkärra och en plan.",
+      "Om man inte ser mjölet så finns det inte. Det är vetenskap.",
+      "Jag tycker vi borde bygga ett utedass till. Ingen har frågat mig.",
+      "Vedhuggaren vinkade åt mig. Eller så viftade han bort en fluga.",
+      "Det är bättre med två bagarstugor än en. Det är bättre med tre än två. Där någonstans tar logiken slut.",
+      "Major skällde i natt. Jag svarade inte. Det var ett beslut."
+    ]
+  },
+  "major": {
+    "namn": "Major",
+    "varningar": {
+      "inget_kafferep": [
+        "Manskapet är hungrigt och det finns inget kafferep. Det är ett allvarligt fel i planeringen.",
+        "Inget kafferep. Folk står i givakt och tänker på mat."
+      ],
+      "inget_pa_bordet": [
+        "Bordet i kafferepet är tomt. Det rapporteras härmed.",
+        "Kafferepet saknar förplägnad. Fullständigt saknar."
+      ],
+      "svalt": [
+        "{antal} man är snart utsvultna. Åtgärd krävs.",
+        "{antal} av folket orkar inte länge till utan mat."
+      ],
+      "gav_upp": [
+        "{antal} har lämnat sina poster och gått hem för att vila. Hungern.",
+        "{antal} gav upp. Det är inte bra för moralen."
+      ],
+      "lite_kaffe_lordag": [
+        "{antal} kaffe kvar, och det är lördag. Lanthandeln är stängd i morgon.",
+        "Lördag. Kafferesurser: {antal}. Rapporten är slut."
+      ],
+      "ingen_arbetare": [
+        "{byggnad} är färdig men saknar {yrke}. Utbilda en i bygdegården.",
+        "{byggnad} står obemannad. Det behövs en {yrke}."
+      ],
+      "inga_barare": [
+        "Det finns inga bärare. Inga varor flyttas.",
+        "Bärarna saknas. Allt står still."
+      ],
+      "bararna_hinner_inte": [
+        "Samtliga bärare är upptagna, hela tiden. Fler behövs.",
+        "Ingen bärare är ledig. Förstärkning behövs."
+      ],
+      "forradet_fullt": [
+        "{byggnad} är full till taket.",
+        "Ingen plats kvar i {byggnad}. En bod till behövs."
+      ],
+      "inga_sangar": [
+        "Inga lediga sängar. Ingen ny kan utbildas.",
+        "Förläggningen är full. Det behövs fler sovplatser."
+      ]
+    },
+    "prat": [
+      "Ordning och reda. Det är det enda som gäller.",
+      "En traktor löser de flesta problem. De andra löser en större traktor.",
+      "Katten på torpet sover mitt på dagen. Det noteras.",
+      "Grisar som rids fortare än man tror. Det har jag sett.",
+      "Ett gott råd: ställ alla byggnader i en rak linje. Det ser bättre ut.",
+      "Holger säger att mjölken från mjölkpallen är den bästa i socknen. Han har inte smakat annan.",
+      "Det luktar hallon från torpet. Det är misstänkt.",
+      "Varje stig ska vara rak. Krokiga stigar är för katter.",
+      "Jag vaktade grinden i hela natt. Ingen kom. Det är så det ska vara.",
+      "Rökt fisk är bra. Rökt fisk med kaffe är bättre. Rökt fisk med kaffe på söndag är omöjligt.",
+      "Gässen är farligare än de ser ut. Jag har ärr.",
+      "Bygg fler bodar. Man kan aldrig ha för många bodar. Man kan ha för många bodar."
+    ]
+  }
+}

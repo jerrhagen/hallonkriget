@@ -6,6 +6,7 @@ Beslut som tagits efter designdokumentet. Nyast överst.
 
 - Spelet startar på kartan `hemmanet` som Torpet. Byggnader utom hönshuset är platshållare: ett hus i byggnadens färggrupp med namnskylt, falurött tak för Torpet och grått för Storgården. Personerna är pysslingen, tonad efter roll, med en lapp för varan de bär.
 - Gränssnittet är tills vidare papper och bläck: en rad överst med klocka, hastighet och folk, och en panel till vänster med flikarna Bygg, Förråd och Folk. En vald byggnad visar recept, lager med spärrar, bygdegårdens utbildning eller lanthandelns byten. Den slitna trälådan med emaljskyltar kommer i fas 5.
+- Sixten (Torpet) eller Major (Storgården) sitter i nedre högra hörnet. Han varnar när ett läge har hållit i sig i 20 sekunder: inget kafferep, tomt bord, folk nära att ge upp, lite kaffe på lördagen, en byggnad utan arbetare, inga eller för få bärare, fullt förråd, inga sängar. Den som ger upp sägs direkt. Var tredje minut upprepar han det viktigaste som gäller, annars pratar han, om pratet är på. Replikerna står i `data/radgivare.json`.
 - Spara och ladda är reprisfilen: snabbsparet ligger i Godots användarmapp under `spara/snabbspar.hkr` och laddas genom att matchen spelas upp till samma tick. Ett laddat spel börjar pausat.
 
 ## 2026-10-08: Alla byggnader och hela matkedjan (fas 2)
