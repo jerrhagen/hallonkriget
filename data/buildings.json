@@ -10,7 +10,7 @@
       ],
       "faction": "torpet",
       "buildable": false,
-      "storage": 40,
+      "storage": 30,
       "start_stock": {
         "brador": 16,
         "sten": 9,
@@ -40,7 +40,7 @@
       ],
       "faction": "storgarden",
       "buildable": false,
-      "storage": 40,
+      "storage": 30,
       "start_stock": {
         "brador": 16,
         "sten": 9,
