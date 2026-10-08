@@ -1,5 +1,5 @@
 {
-  "_kommentar": "Byggnaderna i docs/produktionskedjor.md. Fas 1 har de som behövs för knäckebröd, plus stenröjaren, kafferepet, bygdegården, lanthandeln och rosteriet. Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (beslut 2026-10-08, väntar på Arons svar).",
+  "_kommentar": "Byggnaderna i docs/produktionskedjor.md. Fas 1 har de som behövs för knäckebröd, plus stenröjaren, kafferepet, bygdegården, lanthandeln och rosteriet. Tider i sekunder i normal hastighet. build_seconds saknas: 60/90/120 s för 1x1/2x2/3x3. beds saknas: 1 sovplats. start_people: de som finns från start (Arons beslut 2026-10-08).",
   "buildings": [
     {
       "id": "stugan",
