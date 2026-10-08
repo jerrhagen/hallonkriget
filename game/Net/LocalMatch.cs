@@ -43,11 +43,18 @@ public sealed class LocalMatch
     private readonly List<Command> _tickCommands = new();
     private double _accumulator;
 
-    public LocalMatch(GameData data, MapDef map, ulong seed, Faction faction)
+    /// <summary>
+    /// En ny match. På en karta med två gårdar får grannen det andra lägret och spelas av datorn,
+    /// med den svårighetsgrad som anges.
+    /// </summary>
+    public LocalMatch(GameData data, MapDef map, ulong seed, Faction faction, Difficulty opponent = Difficulty.Normal)
     {
         Data = data;
         LocalPlayer = 0;
-        var setup = MatchSetup.OnMap(seed, map, data, (faction, false));
+        var other = faction == Faction.Torpet ? Faction.Storgarden : Faction.Torpet;
+        var setup = map.Starts.Length >= 2
+            ? MatchSetup.OnMap(seed, map, data, new PlayerSetup(faction, false), new PlayerSetup(other, true, null, opponent))
+            : MatchSetup.OnMap(seed, map, data, (faction, false));
         State = GameState.NewMatch(setup);
         Replay = new SimReplay(seed, map, setup.Players, data.Fingerprint);
     }

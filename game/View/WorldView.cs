@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Hallonkriget.Game.Net;
 using Hallonkriget.Sim;
@@ -100,6 +101,32 @@ public partial class WorldView : Node2D
             }
             view.Sync(snap);
         }
+
+        // Soldater som gett upp och djur som sprungit hem finns inte längre i tillståndet.
+        if (_people.Count > state.People.Count)
+        {
+            var alive = new HashSet<int>();
+            foreach (var p in state.People) alive.Add(p.Id);
+            foreach (var id in _people.Keys.Where(id => !alive.Contains(id)).ToList())
+            {
+                _people[id].QueueFree();
+                _people.Remove(id);
+            }
+        }
+    }
+
+    /// <summary>Den synliga person som står närmast punkten, inom en halv ruta.</summary>
+    public Person? PersonAt(Vector2 world)
+    {
+        Person? best = null;
+        float bestDistance = Tile * 0.6f;
+        foreach (var view in _people.Values)
+        {
+            if (!view.Visible) continue;
+            float d = (view.Position + new Vector2(0, -Tile * 0.4f)).DistanceTo(world);
+            if (d < bestDistance) (bestDistance, best) = (d, view.Person);
+        }
+        return best;
     }
 
     private void SyncMap()

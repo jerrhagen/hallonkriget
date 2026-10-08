@@ -27,12 +27,30 @@ public partial class PersonView : Node2D
         AddChild(_doll);
         _parcel = new Parcel { Position = new Vector2(-14, -66), Visible = false };
         AddChild(_parcel);
-        Modulate = person.Role switch
+        _pennant = new Pennant { Position = new Vector2(0, -70), Visible = false };
+        AddChild(_pennant);
+        UpdateRole();
+    }
+
+    private readonly Pennant _pennant;
+    private PersonRole _role = (PersonRole)255;
+    private int _unit = -2;
+
+    /// <summary>Färgen efter roll. En soldat får en vimpel i lägrets färg med enhetens namn.</summary>
+    private void UpdateRole()
+    {
+        if (Person.Role == _role && Person.Unit == _unit) return;
+        _role = Person.Role;
+        _unit = Person.Unit;
+        Modulate = Person.Role switch
         {
             PersonRole.Laborer => new Color(0.92f, 0.86f, 0.74f),
             PersonRole.Worker => new Color(0.84f, 0.9f, 1.0f),
+            PersonRole.Recruit => new Color(0.95f, 0.88f, 0.88f),
             _ => Colors.White,
         };
+        _pennant.Visible = Person.Unit >= 0;
+        if (Person.Unit >= 0) _pennant.Set(_data.Units[Person.Unit].Name, Person.Owner);
     }
 
     /// <summary>Var personen står enligt simuleringen just nu, i världskoordinater (fötterna).</summary>
@@ -50,6 +68,8 @@ public partial class PersonView : Node2D
         _to = SimPosition();
         if (snap) Position = _to;
         Visible = !Person.Inside;
+        UpdateRole();
+        _pennant.Medal = Person.Medal;
 
         if (Person.Carrying != _carrying)
         {
@@ -68,6 +88,42 @@ public partial class PersonView : Node2D
         var d = _to - _from;
         _doll.SetWalking(d.LengthSquared() < 0.01f ? 0 : (d.X >= 0 ? 1 : -1));
         Position = pos;
+    }
+
+    /// <summary>Vimpeln över en soldat: spelarens röd, grannens blå, med enhetens namn och en medalj.</summary>
+    private sealed partial class Pennant : Node2D
+    {
+        private string _label = "";
+        private Color _color;
+        private bool _medal;
+
+        public bool Medal
+        {
+            set
+            {
+                if (_medal == value) return;
+                _medal = value;
+                QueueRedraw();
+            }
+        }
+
+        public void Set(string unit, byte owner)
+        {
+            _label = unit.Length > 6 ? unit[..6] : unit;
+            _color = owner == 0 ? new Color("a8402c") : new Color("3d5a80");
+            QueueRedraw();
+        }
+
+        public override void _Draw()
+        {
+            var ink = new Color("2b2119");
+            DrawLine(new Vector2(0, 0), new Vector2(0, -34), ink, 3);
+            var flag = new[] { new Vector2(0, -34), new Vector2(64, -26), new Vector2(0, -16) };
+            DrawColoredPolygon(flag, _color);
+            DrawPolyline(new[] { flag[0], flag[1], flag[2] }, ink, 2);
+            DrawString(ThemeDB.FallbackFont, new Vector2(4, -38), _label, HorizontalAlignment.Left, -1, 16, ink);
+            if (_medal) DrawCircle(new Vector2(-8, -20), 6, new Color("d9b44a"));
+        }
     }
 
     /// <summary>En bylte på ryggen med varans namn, tills varorna har egna ikoner.</summary>
