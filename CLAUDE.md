@@ -40,8 +40,12 @@ Utan fönster (Linux, `$GODOT` är Godot-binären):
 $GODOT --headless --path game --import                     # importera nya bilder
 $GODOT --headless --path game --build-solutions --quit     # bygg C#
 xvfb-run -a -s "-screen 0 1280x720x24" $GODOT --path game --rendering-driver opengl3 \
-    --resolution 1280x720 -- --skarmbild=/tmp/bild.png --zoom=1.0   # skärmbild av stilprovet
+    --resolution 1280x720 -- --skarmbild=/tmp/bild.png --zoom=1.0   # skärmbild av spelet
 ```
+
+Spelets argument efter `--` (se `game/Scenes/Gard.cs`): `--karta=hemmanet`, `--lager=storgarden`, `--byggordning=brodgarden` spelar en byggordning åt spelaren, `--spola=70` spolar fram minuter, `--kamera=24,12` (rutor), `--zoom=0.5`, `--valj=bygdegarden` öppnar en byggnad, `--bygga=vedboden --mus=26,16` visar en byggnad som ska placeras, `--provspara` sparar, laddar och jämför, `--utan-papper`.
+
+I spelet: vänsterklick väljer och bygger, högerklick eller Escape avbryter, mellanslag pausar, 1 och 2 väljer hastighet, F5 sparar och F9 laddar snabbsparet i `user://spara/`.
 
 Efter `art/render.py`: nya 2×-bilder ska ha `mipmaps/generate=true` i sin `.import`-fil.
 
