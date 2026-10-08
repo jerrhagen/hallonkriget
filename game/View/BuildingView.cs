@@ -20,6 +20,7 @@ public partial class BuildingView : Node2D
     private readonly GameData _data;
     private Sprite2D? _art;
     private BuildingStage _stage;
+    private int _takenBy = -1, _damage;
     private int _work = -1;
     private bool _selected;
 
@@ -68,7 +69,9 @@ public partial class BuildingView : Node2D
 
     public void Sync()
     {
-        if (Building.Stage == _stage && Building.WorkDone == _work) return;
+        if (Building.Stage == _stage && Building.WorkDone == _work && Building.TakenBy == _takenBy && Building.Damage / 10 == _damage) return;
+        _takenBy = Building.TakenBy;
+        _damage = Building.Damage / 10;
         _stage = Building.Stage;
         _work = Building.WorkDone;
         if (_stage == BuildingStage.Done && _art is null && Building.Def.Id == "honshuset")
@@ -100,6 +103,18 @@ public partial class BuildingView : Node2D
         DrawRect(new Rect2(-w / 2 + 6, -h + 6, w - 12, h - 12), new Color(0.3f, 0.25f, 0.18f, 0.18f));
 
         float progress = def.BuildTicks == 0 ? 1 : Building.WorkDone / (float)def.BuildTicks;
+        if (Building.Stage == BuildingStage.Ruined)
+        {
+            // En ruin: några stenar och brädbitar i gräset.
+            for (int i = 0; i < 6; i++)
+                DrawRect(new Rect2(-w / 2 + 10 + (i * 37) % (w - 30), -h + 20 + (i * 53) % (h - 40), 16, 9), i % 2 == 0 ? new Color("a29c93") : new Color("8f6a45"));
+            return;
+        }
+        if (def.IsWall && Building.Stage == BuildingStage.Done)
+        {
+            DrawWall(w, h, ink);
+            return;
+        }
         if (Building.Stage == BuildingStage.Construction)
         {
             DrawConstruction(w, h, progress, ink);
@@ -107,6 +122,14 @@ public partial class BuildingView : Node2D
         else if (_art is null)
         {
             DrawHouse(w, h, ink);
+        }
+
+        // En tagen byggnad får fiendens flagga på taket.
+        if (Building.IsTaken)
+        {
+            var color = Building.TakenBy == 0 ? new Color("a8402c") : new Color("3d5a80");
+            DrawLine(new Vector2(0, -h * 1.1f), new Vector2(0, -h * 1.1f - 70), ink, 4);
+            DrawColoredPolygon(new[] { new Vector2(0, -h * 1.1f - 70), new Vector2(60, -h * 1.1f - 56), new Vector2(0, -h * 1.1f - 42) }, color);
         }
 
         // Namnet på en lapp under huset.
@@ -151,6 +174,29 @@ public partial class BuildingView : Node2D
         var door = new Rect2(-dw / 2, -margin - dw * 1.5f, dw, dw * 1.5f);
         DrawRect(door, new Color("5a4a3b"));
         DrawRect(door, ink, false, 2);
+    }
+
+    /// <summary>Gärdsgården som stenar i en rad, staketet som stolpar och slanor. Skadan syns som luckor.</summary>
+    private void DrawWall(float w, float h, Color ink)
+    {
+        var def = Building.Def;
+        int missing = def.Wall == 0 ? 0 : Building.Damage * 4 / def.Wall;
+        bool stone = def.Cost.Length > 0 && def.Cost[0].Good == _data.GoodIndex("sten");
+        for (int i = 0; i < 4; i++)
+        {
+            if (i < missing) continue;
+            float x = -w / 2 + 12 + i * (w - 24) / 4;
+            if (stone)
+            {
+                DrawCircle(new Vector2(x + 12, -h / 2), 16, new Color("a29c93"));
+                DrawArc(new Vector2(x + 12, -h / 2), 16, 0, Mathf.Tau, 16, ink, 2);
+            }
+            else
+            {
+                DrawLine(new Vector2(x + 12, -h / 2 + 20), new Vector2(x + 12, -h / 2 - 30), new Color("8f6a45"), 7);
+            }
+        }
+        if (!stone) DrawLine(new Vector2(-w / 2 + 12, -h / 2 - 10), new Vector2(w / 2 - 12, -h / 2 - 10), new Color("8f6a45"), 5);
     }
 
     private void DrawConstruction(float w, float h, float progress, Color ink)

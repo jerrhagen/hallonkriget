@@ -44,7 +44,7 @@ xvfb-run -a -s "-screen 0 1280x720x24" $GODOT --path game --rendering-driver ope
     --resolution 1280x720 -- --skarmbild=/tmp/bild.png --zoom=1.0   # skärmbild av spelet
 ```
 
-Spelets argument efter `--` (se `game/Scenes/Gard.cs`): `--karta=hemmanet`, `--lager=storgarden`, `--byggordning=brodgarden` spelar en byggordning åt spelaren, `--spola=70` spolar fram minuter, `--kamera=24,12` (rutor), `--zoom=0.5`, `--valj=bygdegarden` öppnar en byggnad, `--bygga=vedboden --mus=26,16` visar en byggnad som ska placeras, `--provspara` sparar, laddar och jämför, `--filma=100 --hastighet=1` sparar 100 bilder (en var tredje bildruta; kör Godot med `--fixed-fps 30`), `--utan-papper`.
+Spelets argument efter `--` (se `game/Scenes/Gard.cs`): `--karta=hemmanet` (`grannarna` mot datorn, med `--svarighet=latt|normal|svar`), `--lager=storgarden`, `--byggordning=brodgarden` spelar en byggordning åt spelaren, `--spola=70` spolar fram minuter, `--kamera=24,12` (rutor), `--zoom=0.5`, `--valj=bygdegarden` öppnar en byggnad, `--grupp=0` väljer en grupp, `--bygga=vedboden --mus=26,16` visar en byggnad som ska placeras, `--provspara` sparar, laddar och jämför, `--filma=100 --hastighet=1` sparar 100 bilder (en var tredje bildruta; kör Godot med `--fixed-fps 30`), `--utan-papper`.
 
 I spelet: vänsterklick väljer och bygger, högerklick eller Escape avbryter, mellanslag pausar, 1 och 2 väljer hastighet, F5 sparar och F9 laddar snabbsparet i `user://spara/`.
 

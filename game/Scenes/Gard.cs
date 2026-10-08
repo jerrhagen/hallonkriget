@@ -11,17 +11,17 @@ using Hallonkriget.Sim.Map;
 namespace Hallonkriget.Game;
 
 /// <summary>
-/// Spelet i fas 2: en gård att bygga på kartan hemmanet, utan strid.
+/// Spelet: en gård att bygga på kartan hemmanet, eller på grannarna mot datorn (fas 3).
 ///
 /// Styrning: pilar eller WASD flyttar, mushjulet zoomar, mellersta musknappen drar kartan.
 /// Mellanslag pausar, 1 och 2 väljer hastighet. Vänsterklick väljer och bygger, högerklick eller Escape avbryter.
 /// F5 sparar och F9 laddar snabbsparet.
 ///
-/// Från kommandoraden, efter "--": --karta=hemmanet, --lager=storgarden, --byggordning=namn spelar
+/// Från kommandoraden, efter "--": --karta=hemmanet (grannarna: mot datorn), --svarighet=latt|normal|svar, --lager=storgarden, --byggordning=namn spelar
 /// en byggordning åt spelaren, --spola=minuter spolar fram, --skarmbild=fil.png tar en bild och
 /// avslutar, --zoom=0.5 och --kamera=x,y (rutor) ställer kameran, --utan-papper, --provspara, --filma=bilder
 /// (en bild var tredje bildruta till skarmbild_000.png och framåt), --hastighet=2.
-/// För skärmbilder: --valj=bygdegarden (eller byggnadsnummer) öppnar en byggnad, --bygga=id och --mus=x,y visar en byggnad som ska placeras.
+/// För skärmbilder: --valj=bygdegarden (eller byggnadsnummer) öppnar en byggnad, --grupp=0 väljer en grupp i armén, --bygga=id och --mus=x,y visar en byggnad som ska placeras.
 /// </summary>
 public partial class Gard : Node2D
 {
@@ -47,7 +47,13 @@ public partial class Gard : Node2D
         var data = GameFiles.LoadData();
         string mapId = _args.GetValueOrDefault("karta", "hemmanet");
         var faction = _args.GetValueOrDefault("lager") == "storgarden" ? Faction.Storgarden : Faction.Torpet;
-        _match = new LocalMatch(data, GameFiles.LoadMap(mapId), 1958_07_14UL, faction);
+        var difficulty = _args.GetValueOrDefault("svarighet") switch
+        {
+            "latt" => Difficulty.Easy,
+            "svar" => Difficulty.Hard,
+            _ => Difficulty.Normal,
+        };
+        _match = new LocalMatch(data, GameFiles.LoadMap(mapId), 1958_07_14UL, faction, difficulty);
         if (_args.TryGetValue("byggordning", out var order))
             _match.Autopilot = new Hallonkriget.Sim.Ai.BuildOrderPlayer(GameFiles.LoadBuildOrder(order, data), 0);
         _advisor.Attach(_match);
@@ -79,6 +85,7 @@ public partial class Gard : Node2D
         _hud.LoadRequested = Load;
         if (_args.TryGetValue("valj", out var sel))
             _hud.Select(int.TryParse(sel, out int id) ? id : _match.State.Buildings.First(b => b.Def.Id == sel).Id);
+        if (_args.TryGetValue("grupp", out var grp)) _hud.SelectGroup(int.Parse(grp));
         if (_args.TryGetValue("bygga", out var place)) _hud.StartPlacing(data.Building(place));
         if (_args.TryGetValue("mus", out var mouse))
         {
@@ -192,7 +199,7 @@ public partial class Gard : Node2D
             if (mb.Pressed && mb.ButtonIndex == MouseButton.WheelUp) ZoomBy(1.1f);
             if (mb.Pressed && mb.ButtonIndex == MouseButton.WheelDown) ZoomBy(1 / 1.1f);
             if (mb.ButtonIndex == MouseButton.Middle) _dragging = mb.Pressed;
-            if (mb.Pressed && mb.ButtonIndex == MouseButton.Left) _hud.LeftClick(MouseTile(), mb.ShiftPressed);
+            if (mb.Pressed && mb.ButtonIndex == MouseButton.Left) _hud.LeftClick(MouseTile(), GetGlobalMousePosition(), mb.ShiftPressed);
             if (mb.Pressed && mb.ButtonIndex == MouseButton.Right) _hud.Cancel();
         }
         if (e is InputEventMouseMotion motion)

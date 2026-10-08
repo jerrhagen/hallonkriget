@@ -9,26 +9,30 @@ using Hallonkriget.Sim.Buildings;
 using Hallonkriget.Sim.Commands;
 using Hallonkriget.Sim.Data;
 using Hallonkriget.Sim.Map;
+using Hallonkriget.Sim.Military;
 using Hallonkriget.Sim.People;
 
 namespace Hallonkriget.Game.Ui;
 
 /// <summary>
-/// Gränssnittet, som i KaM: en panel till vänster med flikarna Bygg, Förråd och Folk, och en
+/// Gränssnittet, som i KaM: en panel till vänster med flikarna Bygg, Förråd, Folk och Armé, och en
 /// rad överst med klockan och hastigheten. Klickar man på en byggnad visar panelen den: lager,
-/// arbetare, recept, bygdegårdens kö och lanthandelns byten. Allt spelaren gör blir kommandon.
+/// arbetare, recept, bygdegårdens kö, lanthandelns byten och logens utrustning. Klickar man på en
+/// egen soldat väljs hans grupp, och nästa klick på kartan blir en order. Allt blir kommandon.
 /// </summary>
 public partial class Hud : CanvasLayer
 {
-    public enum Tool { None, Build, Path }
+    public enum Tool { None, Build, Path, Trap }
 
-    private enum Tab { Build, Stock, People }
+    private enum Tab { Build, Stock, People, Army }
 
     private LocalMatch _match = null!;
     private WorldView _world = null!;
     private Overlay _overlay = null!;
     private Tab _tab = Tab.Build;
     private int _selected = -1;
+    private int _group = -1;
+    private EndScene? _end;
     private string _contentKey = "";
     private double _refresh;
 
@@ -43,17 +47,20 @@ public partial class Hud : CanvasLayer
     /// <summary>Spara och ladda; sätts av scenen.</summary>
     public Action? SaveRequested, LoadRequested;
 
-    private GameState State => _match.State;
+    internal GameState State => _match.State;
     private GameData Data => _match.Data;
-    private byte Me => _match.LocalPlayer;
+    internal byte Me => _match.LocalPlayer;
 
     public void Attach(LocalMatch match, WorldView world)
     {
         _match = match;
         _world = world;
         _selected = -1;
+        _group = -1;
         _contentKey = "";
         Current = Tool.None;
+        _end?.QueueFree();
+        _end = null;
         Placing = null;
         if (_overlay is not null && IsInstanceValid(_overlay)) _overlay.QueueFree();
         _overlay = new Overlay(this) { Name = "Overlay", ZIndex = 50 };
@@ -106,7 +113,7 @@ public partial class Hud : CanvasLayer
         panel.AddChild(column);
         var tabs = new HBoxContainer();
         column.AddChild(tabs);
-        foreach (var (tab, text) in new[] { (Tab.Build, "Bygg"), (Tab.Stock, "Förråd"), (Tab.People, "Folk") })
+        foreach (var (tab, text) in new[] { (Tab.Build, "Bygg"), (Tab.Stock, "Förråd"), (Tab.People, "Folk"), (Tab.Army, "Armé") })
         {
             var b = new Button { Text = text, ToggleMode = true, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
             var t = tab;
@@ -134,6 +141,13 @@ public partial class Hud : CanvasLayer
         int mood = mine.Count == 0 ? 0 : (int)mine.Average(p => p.Mood);
         _people.Text = $"Folk {pop}/{State.Beds(Me)}   Humör {mood}   Gav upp {State.Players[Me].GaveUp}";
         RefreshContent();
+        if (State.Winner >= 0 && _end is null)
+        {
+            _end = new EndScene { Name = "Slutscen" };
+            AddChild(_end);
+            _end.Show(State, Data, Me);
+            _match.Speed = 0;
+        }
     }
 
     public static string ClockText(int tick)
@@ -150,6 +164,7 @@ public partial class Hud : CanvasLayer
     {
         _tab = tab;
         _selected = -1;
+        if (tab != Tab.Army) _group = -1;
         foreach (var (t, b) in _tabButtons) b.SetPressedNoSignal(t == tab);
         _contentKey = "";
         RefreshContent();
@@ -172,6 +187,7 @@ public partial class Hud : CanvasLayer
         {
             Tab.Build => $"bygg{Current}{Placing?.Id}",
             Tab.Stock => "förråd" + string.Join(",", StoredTotals()),
+            Tab.Army => "armé" + ArmyKey(),
             _ => "folk" + PeopleKey(),
         };
         if (key == _contentKey) return;
@@ -180,6 +196,7 @@ public partial class Hud : CanvasLayer
         if (_selected >= 0) BuildInspector(State.Buildings[_selected]);
         else if (_tab == Tab.Build) BuildBuildTab();
         else if (_tab == Tab.Stock) BuildStockTab();
+        else if (_tab == Tab.Army) BuildArmyTab();
         else BuildPeopleTab();
     }
 
@@ -357,6 +374,7 @@ public partial class Hud : CanvasLayer
         if (def.IsStorage) StockList(b, output: true);
         else if (def.School is not null) SchoolPanel(b);
         else if (def.IsTrade) TradePanel(b);
+        else if (def.Barracks) BarracksPanel(b);
         else
         {
             if (def.Recipes.Length > 1) RecipePanel(b);
@@ -466,6 +484,133 @@ public partial class Hud : CanvasLayer
         StockList(b, output: false);
     }
 
+    // ---- Armén ----
+
+    private IEnumerable<Group> MyGroups() => State.Groups.Where(g => g.Owner == Me && !g.IsEmpty);
+
+    private string ArmyKey() =>
+        $"{_group}{Current}" + string.Join(",", MyGroups().Select(g => $"{g.Id}:{g.Members.Count}:{g.Order}:{g.Columns}"));
+
+    private static string OrderText(GroupOrder order) => order switch
+    {
+        GroupOrder.Move => "marscherar",
+        GroupOrder.AttackGroup => "anfaller",
+        GroupOrder.AttackBuilding => "belägrar",
+        _ => "står still",
+    };
+
+    private void BuildArmyTab()
+    {
+        Add(Style.Title("Armé"));
+        var player = State.Players[Me];
+        Add(Style.Small($"Gett upp: {player.SoldiersLost} soldater och {player.AnimalsLost} djur. Tagna byggnader: {player.BuildingsTaken}."));
+        if (_group >= 0 && State.Groups[_group] is { IsEmpty: false } g && g.Owner == Me)
+        {
+            GroupPanel(g);
+            return;
+        }
+        _group = -1;
+        var groups = MyGroups().ToList();
+        if (groups.Count == 0) Add(Style.Small("Inga soldater än. Utbilda rekryter i bygdegården och utrusta dem i logen."));
+        foreach (var grp in groups)
+        {
+            int id = grp.Id;
+            AddButton($"{Data.Units[grp.Unit].Name} ×{grp.Members.Count}, {OrderText(grp.Order)}", () => SelectGroup(id));
+        }
+        Add(new HSeparator());
+        Add(Style.Small("Råttfällor läggs ut här och gillras av en hantlangare. Högst tio."));
+        AddButton("Råttfälla", () => SetTool(Current == Tool.Trap ? Tool.None : Tool.Trap), pressed: Current == Tool.Trap);
+    }
+
+    private void GroupPanel(Group g)
+    {
+        var unit = Data.Units[g.Unit];
+        AddButton("← Alla grupper", () => SelectGroup(-1));
+        Add(new Label { Text = $"{unit.Name} ×{g.Members.Count}, {OrderText(g.Order)}" });
+        var men = g.Members.Select(id => State.People.FirstOrDefault(p => p.Id == id)).Where(p => p is not null).ToList();
+        if (men.Count > 0)
+            Add(Style.Small($"Humör i snitt {(int)men.Average(p => p!.Mood)} av {unit.Mood}. Anfall {unit.Attack}, försvar {unit.Defence}."));
+        Add(Style.Small("Klicka på kartan för att gå dit, på en fiende eller en fiendebyggnad för att anfalla."));
+        int id = g.Id;
+        AddButton("Stanna", () => _match.Submit(CommandType.HaltGroup, id));
+        var row = new HBoxContainer();
+        Add(row);
+        foreach (var (text, columns) in new[] { ("Smalare", g.Columns - 1), ("Bredare", g.Columns + 1) })
+        {
+            int c = columns;
+            var b = new Button { Text = text, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+            b.Pressed += () => _match.Submit(CommandType.SetFormation, id, c);
+            row.AddChild(b);
+        }
+        var turn = new HBoxContainer();
+        Add(turn);
+        foreach (var (text, delta) in new[] { ("Vänd vänster", 7), ("Vänd höger", 1) })
+        {
+            int f = (g.Facing + delta) % 8;
+            var b = new Button { Text = text, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+            b.Pressed += () => _match.Submit(CommandType.TurnGroup, id, f);
+            turn.AddChild(b);
+        }
+        AddButton("Dela gruppen", () => _match.Submit(CommandType.SplitGroup, id), disabled: g.Members.Count < 2);
+        var other = MyGroups().FirstOrDefault(o => o.Id != g.Id && o.Unit == g.Unit);
+        if (other is not null)
+        {
+            int o = other.Id;
+            AddButton($"Slå ihop med en annan {unit.Name.ToLowerInvariant()}", () => _match.Submit(CommandType.MergeGroups, id, o));
+        }
+    }
+
+    public void SelectGroup(int group)
+    {
+        _group = group;
+        _selected = -1;
+        _world.SetSelected(-1);
+        _tab = Tab.Army;
+        foreach (var (t, b) in _tabButtons) b.SetPressedNoSignal(t == Tab.Army);
+        _contentKey = "";
+        RefreshContent();
+        _overlay.QueueRedraw();
+    }
+
+    public int SelectedGroup => _group;
+
+    /// <summary>Order till den valda gruppen: anfall en fiende eller en fiendebyggnad, annars gå dit.</summary>
+    private void GiveOrder(TilePoint tile, Person? clicked)
+    {
+        if (clicked is { Role: PersonRole.Soldier } enemy && enemy.Owner != Me && enemy.Group >= 0)
+        {
+            _match.Submit(CommandType.AttackGroup, _group, enemy.Group);
+            return;
+        }
+        int occupant = State.Map.Inside(tile) ? State.Map.OccupantAt(tile) : 0;
+        var building = occupant > 0 ? State.Buildings[occupant - 1] : State.Buildings.FirstOrDefault(b => b.Entrance == tile);
+        if (building is not null && building.Owner != Me)
+        {
+            _match.Submit(CommandType.AttackBuilding, _group, building.Id);
+            return;
+        }
+        _match.Submit(CommandType.MoveGroup, _group, tile.X, tile.Y);
+    }
+
+    /// <summary>Logen: rekryterna som väntar, utrustningen i lagret och knappar för varje enhet.</summary>
+    private void BarracksPanel(Building b)
+    {
+        Add(new HSeparator());
+        int recruits = State.RecruitsIn(b).Count;
+        Add(new Label { Text = $"{recruits} rekryter väntar i logen." });
+        var faction = State.Players[Me].Faction;
+        foreach (var u in Data.Units.Where(u => u.AllowedFor(faction) && !u.Hero && u.Fixed is null))
+        {
+            string gear = string.Join(", ", u.Gear.Select(a => $"{a.Count} {Data.Goods[a.Good].Name.ToLowerInvariant()}"));
+            string who = u.Recruits == 0 ? "inga rekryter" : u.Recruits == 1 ? "1 rekryt" : $"{u.Recruits} rekryter";
+            bool can = State.CanEquip(b, u);
+            int index = u.Index;
+            AddButton($"Utrusta {u.Name}", () => _match.Submit(CommandType.Equip, b.Id, index, 1), disabled: !can,
+                tooltip: $"{who}, {gear}" + (u.Squad > 1 ? $", per figur ({u.Squad} i en flock)" : ""));
+        }
+        StockList(b, output: false);
+    }
+
     // ---- Verktyg på kartan ----
 
     private void SetTool(Tool tool)
@@ -504,10 +649,14 @@ public partial class Hud : CanvasLayer
     }
 
     /// <summary>Vänsterklick på kartan. Returnerar true om klicket användes.</summary>
-    public bool LeftClick(TilePoint tile, bool shift)
+    public bool LeftClick(TilePoint tile, Vector2 world, bool shift)
     {
         switch (Current)
         {
+            case Tool.Trap:
+                _match.Submit(CommandType.PlaceTrap, tile.X, tile.Y);
+                if (!shift) SetTool(Tool.None);
+                return true;
             case Tool.Build when Placing is not null:
             {
                 var origin = OriginFor(Placing, tile);
@@ -521,6 +670,17 @@ public partial class Hud : CanvasLayer
                 return true;
         }
         if (!State.Map.Inside(tile)) return false;
+        var clicked = _world.PersonAt(world);
+        if (clicked is { Role: PersonRole.Soldier } own && own.Owner == Me && own.Group >= 0 && own.Group != _group)
+        {
+            SelectGroup(own.Group);
+            return true;
+        }
+        if (_group >= 0)
+        {
+            GiveOrder(tile, clicked);
+            return true;
+        }
         int occupant = State.Map.OccupantAt(tile);
         if (occupant > 0)
         {
@@ -549,6 +709,11 @@ public partial class Hud : CanvasLayer
             SetTool(Tool.None);
             return;
         }
+        if (_group >= 0)
+        {
+            SelectGroup(-1);
+            return;
+        }
         if (_selected >= 0)
         {
             _world.SetSelected(-1);
@@ -567,6 +732,21 @@ public partial class Hud : CanvasLayer
         {
             const int T = WorldView.Tile;
             var hover = _hud.Hover;
+            if (_hud._group >= 0 && _hud.State.Groups[_hud._group] is { IsEmpty: false } chosen)
+            {
+                foreach (var p in _hud.State.People)
+                    if (p.Group == chosen.Id)
+                        DrawArc(WorldView.TileCenter(p.Tile), T * 0.3f, 0, Mathf.Tau, 24, new Color(0.95f, 0.85f, 0.4f, 0.9f), 4);
+                DrawCircle(WorldView.TileCenter(chosen.Anchor), 8, new Color(Style.Ink, 0.6f));
+            }
+            foreach (var trap in _hud.State.Traps)
+                if (trap.Owner == _hud.Me)
+                    DrawRect(new Rect2(trap.Tile.X * T + 40, trap.Tile.Y * T + 52, T - 80, T - 104), new Color(Style.Ink, trap.Armed ? 0.8f : 0.35f), false, 4);
+            if (_hud.Current == Tool.Trap)
+            {
+                DrawRect(new Rect2(hover.X * T + 40, hover.Y * T + 52, T - 80, T - 104), new Color(0.7f, 0.1f, 0.1f, 0.6f), false, 4);
+                return;
+            }
             if (_hud.Current == Tool.Path)
             {
                 var ok = _hud.CanPathHere(hover);
