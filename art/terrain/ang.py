@@ -63,16 +63,20 @@ FLOWERS = [(_prastkrage, 3), (_smorblomma, 4), (_blaklocka, 2), (_klover, 2)]
 
 
 def _base(c: Canvas) -> None:
-    """Grunden, gemensam för alla varianter och periodisk, så att alla varianter passar ihop."""
+    """Grunden, gemensam för alla varianter och periodisk, så att alla varianter passar ihop.
+
+    Fläckarna hålls svaga: starka fläckar upprepas ruta för ruta och syns som ett rutmönster
+    när man zoomar ut. De stora skiftningarna kommer från tonen (ang_ton.py) i stället.
+    """
     for _ in range(8):
         x, y = c.rng.uniform(0, TILE), c.rng.uniform(0, TILE)
         color = c.rng.choice(["ang_ljus", "ang_mork", "ang_ljus", "halmgult_ljus"])
         c.glaze(ellipse_points(x, y, c.rng.uniform(14, 34), c.rng.uniform(10, 24)), color,
-                opacity=c.rng.uniform(0.22, 0.4), blur=8)
+                opacity=c.rng.uniform(0.07, 0.13), blur=8)
     for _ in range(4):
         x, y = c.rng.uniform(0, TILE), c.rng.uniform(0, TILE)
         c.wash(ellipse_points(x, y, c.rng.uniform(12, 24), c.rng.uniform(8, 14)),
-               c.rng.choice(["ang", "ang_ljus"]), opacity=0.3, wet=1.5, grain=1.5, solid=False)
+               c.rng.choice(["ang", "ang_ljus"]), opacity=0.12, wet=1.5, grain=1.5, solid=False)
     for _ in range(20):
         _tuft(c, c.rng.uniform(0, TILE), c.rng.uniform(0, TILE), c.rng.uniform(5, 9),
               c.rng.choice(["ang_mork", "mossgront_mork", "mossgront_mork"]))
@@ -93,7 +97,7 @@ def draw(variant: int) -> Canvas:
     for _ in range(2 + variant):
         x, y = inside()
         c.glaze(ellipse_points(x, y, c.rng.uniform(5, 9), c.rng.uniform(4, 7)),
-                c.rng.choice(["ang_ljus", "halmgult_ljus"]), opacity=0.35, blur=3)
+                c.rng.choice(["ang_ljus", "halmgult_ljus"]), opacity=0.2, blur=3)
     for _ in range(8):
         x, y = inside()
         _tuft(c, x, y, c.rng.uniform(6, 9), c.rng.choice(["ang_mork", "mossgront_mork"]))
